@@ -1161,6 +1161,13 @@
         });
       }
 
+      function formatarDataBR(isoDate) {
+        if (!isoDate) return "";
+        const [ano, mes, dia] = isoDate.split("-");
+        if (!ano || !mes || !dia) return isoDate;
+        return `${dia}/${mes}/${ano}`;
+      }
+
       const CARD_SURCHARGE_RATE = 0.08; // 8% de acréscimo no cartão
 
       function calcularSubtotal() {
@@ -1510,19 +1517,40 @@
             ? `WhatsApp (${dados.whatsappConfirmacao})`
             : dados.confirmacaoPresenca;
 
-        lastWhatsMessage = `Olá! Gostaria de formalizar meu pedido na Raíz & Pixel ✨
+        lastWhatsMessage = `✨🌿 *RAÍZ & PIXEL CONVITES* 🌿✨
+_Formalização de Pedido_
 
-*Contratante:* ${dados.nomeContratante}
-*Aniversariante:* ${dados.nomeAniversariante}
-*Data do evento:* ${dados.dataEvento} às ${dados.horaEvento}
-*Tema:* ${dados.temaFesta}
-*Modelo escolhido:* ${dados.modelo}
-*Complementos:* ${complementos.length ? complementos.join(", ") : "Nenhum"}
-*Confirmação de presença via:* ${confirmacaoTexto}${dados.sugestoesPresente ? `\n*Sugestões de presente:* ${dados.sugestoesPresente}` : ""}${dados.chavePixValor ? `\n*Chave Pix informada:* ${dados.chavePixValor}` : ""}${dados.outrosValor ? `\n*Outros (detalhes):* ${dados.outrosValor}` : ""}
-*Pagamento:* ${dados.pagamento}${isCartao ? `\n*Subtotal:* ${brl(subtotal)}\n*Acréscimo cartão (8%):* ${brl(total - subtotal)}` : ""}
-*Investimento Total:* ${brl(total)}
+Olá! Tudo bem? Gostaria de formalizar meu pedido 💌
 
-📎 Estou anexando o PDF do contrato que acabei de baixar, conforme orientado!`;
+━━━━━━━━━━━━━━━
+👤 *CONTRATANTE*
+━━━━━━━━━━━━━━━
+Nome: ${dados.nomeContratante}
+
+━━━━━━━━━━━━━━━
+🎉 *DETALHES DO EVENTO*
+━━━━━━━━━━━━━━━
+🎂 Aniversariante: ${dados.nomeAniversariante}
+📅 Data: ${formatarDataBR(dados.dataEvento)} às ${dados.horaEvento}
+🎨 Tema: ${dados.temaFesta}
+📬 Confirmação via: ${confirmacaoTexto}${dados.sugestoesPresente ? `\n🎁 Sugestões de presente: ${dados.sugestoesPresente}` : ""}
+
+━━━━━━━━━━━━━━━
+💌 *PRODUTO CONTRATADO*
+━━━━━━━━━━━━━━━
+📦 Modelo: ${dados.modelo}
+➕ Complementos: ${complementos.length ? complementos.join(", ") : "Nenhum"}${dados.chavePixValor ? `\n🔑 Chave Pix informada: ${dados.chavePixValor}` : ""}${dados.outrosValor ? `\n📝 Outros (detalhes): ${dados.outrosValor}` : ""}
+
+━━━━━━━━━━━━━━━
+💰 *PAGAMENTO*
+━━━━━━━━━━━━━━━
+Forma: ${dados.pagamento}${isCartao ? `\nSubtotal: ${brl(subtotal)}\nAcréscimo cartão (8%): ${brl(total - subtotal)}` : ""}
+
+💎 *Investimento Total: ${brl(total)}*
+
+📎 Estou anexando o PDF do contrato que acabei de baixar, conforme orientado!
+
+Aguardo retorno, obrigado(a)! 🌸`;
 
         /* Reabrir modal no estado inicial */
         document.getElementById("stepDownload").classList.remove("done");
