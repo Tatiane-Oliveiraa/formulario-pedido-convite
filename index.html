@@ -944,11 +944,11 @@
           <h2><span class="step-num">7</span> Forma de Pagamento</h2>
           <div class="pill-group">
             <label class="pill"
-              ><input type="radio" name="pagamento" value="Pix" required />
+              ><input type="radio" name="pagamento" value="Pix" />
               Pix</label
             >
             <label class="pill"
-              ><input type="radio" name="pagamento" value="Cartão" required />
+              ><input type="radio" name="pagamento" value="Cartão" />
               Cartão (+taxas)</label
             >
           </div>
@@ -1517,40 +1517,32 @@
             ? `WhatsApp (${dados.whatsappConfirmacao})`
             : dados.confirmacaoPresenca;
 
-        lastWhatsMessage = `✨🌿 *RAÍZ & PIXEL CONVITES* 🌿✨
+        lastWhatsMessage = `✨ *RAÍZ & PIXEL CONVITES* ✨
 _Formalização de Pedido_
 
 Olá! Tudo bem? Gostaria de formalizar meu pedido 💌
 
-━━━━━━━━━━━━━━━
-👤 *CONTRATANTE*
-━━━━━━━━━━━━━━━
+*👤 CONTRATANTE*
 Nome: ${dados.nomeContratante}
 
-━━━━━━━━━━━━━━━
-🎉 *DETALHES DO EVENTO*
-━━━━━━━━━━━━━━━
+*🎉 DETALHES DO EVENTO*
 🎂 Aniversariante: ${dados.nomeAniversariante}
 📅 Data: ${formatarDataBR(dados.dataEvento)} às ${dados.horaEvento}
 🎨 Tema: ${dados.temaFesta}
-📬 Confirmação via: ${confirmacaoTexto}${dados.sugestoesPresente ? `\n🎁 Sugestões de presente: ${dados.sugestoesPresente}` : ""}
+✅ Confirmação via: ${confirmacaoTexto}${dados.sugestoesPresente ? `\n🎁 Sugestões de presente: ${dados.sugestoesPresente}` : ""}
 
-━━━━━━━━━━━━━━━
-💌 *PRODUTO CONTRATADO*
-━━━━━━━━━━━━━━━
+*💌 PRODUTO CONTRATADO*
 📦 Modelo: ${dados.modelo}
 ➕ Complementos: ${complementos.length ? complementos.join(", ") : "Nenhum"}${dados.chavePixValor ? `\n🔑 Chave Pix informada: ${dados.chavePixValor}` : ""}${dados.outrosValor ? `\n📝 Outros (detalhes): ${dados.outrosValor}` : ""}
 
-━━━━━━━━━━━━━━━
-💰 *PAGAMENTO*
-━━━━━━━━━━━━━━━
+*💰 PAGAMENTO*
 Forma: ${dados.pagamento}${isCartao ? `\nSubtotal: ${brl(subtotal)}\nAcréscimo cartão (8%): ${brl(total - subtotal)}` : ""}
 
 💎 *Investimento Total: ${brl(total)}*
 
 📎 Estou anexando o PDF do contrato que acabei de baixar, conforme orientado!
 
-Aguardo retorno, obrigado(a)! 🌸`;
+Aguardo retorno, obrigado(a)! 🙏`;
 
         /* Reabrir modal no estado inicial */
         document.getElementById("stepDownload").classList.remove("done");
