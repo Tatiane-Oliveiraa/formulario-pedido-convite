@@ -1,48 +1,35 @@
 <?php
 /**
- * Raíz & Pixel — Importador Robusto de Backup v2
- * Compatível com PHP 8.0+, MySQL e PostgreSQL (Supabase/Render)
+ * Raíz & Pixel — Importador de Backup v3
+ * Estratégia: importa sem precisar desabilitar FK no PostgreSQL
+ * - Clientes primeiro (com CPF tratado)
+ * - Pedidos com cliente_id = NULL se cliente não existir
+ * - Financeiro com pedido_id = NULL se pedido não existir
+ * - Todos os erros são reportados, nunca interrompem o processo
  */
 
 require_once __DIR__ . '/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { exit(0); }
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    jsonError('Método não permitido', 405);
-}
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') { jsonError('Método não permitido', 405); }
 
 $raw = file_get_contents('php://input');
-if (!$raw) {
-    jsonError('Nenhum dado recebido. Verifique se o arquivo foi enviado corretamente.', 400);
-}
+if (!$raw) { jsonError('Nenhum dado recebido.', 400); }
 
 $dados = json_decode($raw, true);
 if (json_last_error() !== JSON_ERROR_NONE) {
-    jsonError('Arquivo JSON inválido: ' . json_last_error_msg(), 400);
+    jsonError('JSON inválido: ' . json_last_error_msg(), 400);
 }
-
 if (!isset($dados['clientes']) && !isset($dados['pedidos'])) {
-    jsonError('Estrutura do backup não reconhecida. Certifique-se de usar o arquivo JSON exportado pelo sistema.', 400);
+    jsonError('Estrutura do backup não reconhecida.', 400);
 }
 
-// ── Conectar ──────────────────────────────────────────────────
-try {
-    $pdo = getConnection();
-} catch (Exception $e) {
-    jsonError('Erro de conexão com banco: ' . $e->getMessage(), 500);
-}
+try { $pdo = getConnection(); }
+catch (Exception $e) { jsonError('Erro de conexão: ' . $e->getMessage(), 500); }
 
-$isMySQL = (DB_DRIVER !== 'pgsql');
+$isPgsql = (DB_DRIVER === 'pgsql');
 
-// ── Desabilitar FK temporariamente ───────────────────────────
-if ($isMySQL) {
-    try { $pdo->exec('SET FOREIGN_KEY_CHECKS = 0'); } catch (Exception $e) {}
-} else {
-    try { $pdo->exec('SET session_replication_role = replica'); } catch (Exception $e) {}
-}
-
-// ── Relatório ─────────────────────────────────────────────────
+// ── Relatório ──────────────────────────────────────────────────
 $rel = [
     'clientes'   => ['ok' => 0, 'pulados' => 0, 'erros' => []],
     'produtos'   => ['ok' => 0, 'pulados' => 0, 'erros' => []],
@@ -50,169 +37,194 @@ $rel = [
     'financeiro' => ['ok' => 0, 'pulados' => 0, 'erros' => []],
 ];
 
-// ── Busca colunas reais de uma tabela ─────────────────────────
-function obterColunas($pdo, $tabela) {
+// ── Colunas reais de cada tabela ───────────────────────────────
+function colunas($pdo, $tabela) {
     try {
         if (DB_DRIVER === 'pgsql') {
-            $stmt = $pdo->prepare(
+            $r = $pdo->prepare(
                 "SELECT column_name FROM information_schema.columns
-                 WHERE table_schema = 'public' AND table_name = :t"
+                 WHERE table_schema='public' AND table_name=:t ORDER BY ordinal_position"
             );
-            $stmt->execute([':t' => $tabela]);
-            return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'column_name');
+            $r->execute([':t' => $tabela]);
+            return array_column($r->fetchAll(PDO::FETCH_ASSOC), 'column_name');
         } else {
-            $stmt = $pdo->query("SHOW COLUMNS FROM `{$tabela}`");
-            return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'Field');
+            $r = $pdo->query("SHOW COLUMNS FROM `{$tabela}`");
+            return array_column($r->fetchAll(PDO::FETCH_ASSOC), 'Field');
         }
-    } catch (Exception $e) {
-        return [];
-    }
+    } catch (Exception $e) { return []; }
 }
 
-// ── Normaliza um valor para o banco ──────────────────────────
-function normalizar($valor) {
-    if ($valor === '' || $valor === 'null') return null;
-    return $valor;
-}
+// ── Conjunto de IDs que foram importados com sucesso ───────────
+$idsClientesImportados = [];
+$idsPedidosImportados  = [];
 
-// ── Filtra registro para conter só colunas existentes ────────
-function filtrarRegistro($reg, $colunas, $tabela = '') {
-    // Garantir ID
-    if (empty($reg['id'])) {
-        $reg['id'] = generateUUID();
-    }
-
-    // CPF: obrigatório e único em clientes
-    if ($tabela === 'clientes') {
-        $cpf = isset($reg['cpf']) ? preg_replace('/[^0-9]/', '', (string)$reg['cpf']) : '';
-        if (empty($cpf)) {
-            // Gera placeholder único baseado no ID
-            $cpf = 'SEMCPF' . strtoupper(substr(str_replace('-', '', $reg['id']), 0, 11));
-        }
-        $reg['cpf'] = $cpf;
-    }
-
-    // Status válido em pedidos
-    if ($tabela === 'pedidos') {
-        $statusValidos = ['Novo','Fechado','Em Produção','Aguardando Aprovação','Aprovado','Entregue','Cancelado'];
-        if (empty($reg['status']) || !in_array($reg['status'], $statusValidos)) {
-            $reg['status'] = 'Novo';
-        }
-    }
-
-    // Filtrar: só campos que existem na tabela, exceto created_at
-    $filtrado = ['id' => $reg['id']];
-    foreach ($colunas as $col) {
-        if ($col === 'id' || $col === 'created_at') continue;
-        if (array_key_exists($col, $reg)) {
-            $filtrado[$col] = normalizar($reg[$col]);
-        }
-    }
-    return $filtrado;
-}
-
-// ── Insere um registro ignorando duplicatas ───────────────────
-function inserirRegistro($pdo, $tabela, $dados, &$secao, $isMySQL) {
-    if (empty($dados) || empty($dados['id'])) {
-        $secao['pulados']++;
-        return;
-    }
+// ── Inserção de um registro ────────────────────────────────────
+function inserir($pdo, $tabela, $dados, &$secao, $isPgsql) {
+    if (empty($dados['id'])) { $secao['pulados']++; return false; }
 
     $campos = array_keys($dados);
+    $params = implode(', ', array_map(fn($c) => ":{$c}", $campos));
 
-    if ($isMySQL) {
-        $colsSQL = implode(', ', array_map(fn($c) => "`{$c}`", $campos));
-        $params  = implode(', ', array_map(fn($c) => ":{$c}", $campos));
-        $sql = "INSERT IGNORE INTO `{$tabela}` ({$colsSQL}) VALUES ({$params})";
+    if ($isPgsql) {
+        $cols = implode(', ', $campos);
+        $sql  = "INSERT INTO {$tabela} ({$cols}) VALUES ({$params}) ON CONFLICT (id) DO NOTHING";
     } else {
-        $colsSQL = implode(', ', $campos);
-        $params  = implode(', ', array_map(fn($c) => ":{$c}", $campos));
-        $sql = "INSERT INTO {$tabela} ({$colsSQL}) VALUES ({$params}) ON CONFLICT (id) DO NOTHING";
+        $cols = implode(', ', array_map(fn($c) => "`{$c}`", $campos));
+        $sql  = "INSERT IGNORE INTO `{$tabela}` ({$cols}) VALUES ({$params})";
     }
 
     try {
         $stmt = $pdo->prepare($sql);
-        // Bind com tipos corretos
         foreach ($dados as $col => $val) {
             if (is_null($val)) {
                 $stmt->bindValue(":{$col}", null, PDO::PARAM_NULL);
             } elseif (is_bool($val)) {
-                $stmt->bindValue(":{$col}", $val ? 1 : 0, PDO::PARAM_INT);
-            } elseif (is_int($val)) {
-                $stmt->bindValue(":{$col}", $val, PDO::PARAM_INT);
-            } elseif (is_float($val)) {
-                $stmt->bindValue(":{$col}", $val);
+                $stmt->bindValue(":{$col}", (int)$val, PDO::PARAM_INT);
             } else {
-                $stmt->bindValue(":{$col}", (string)$val, PDO::PARAM_STR);
+                $stmt->bindValue(":{$col}", $val);
             }
         }
         $stmt->execute();
-        $affected = $stmt->rowCount();
-        if ($affected > 0) {
+        if ($stmt->rowCount() > 0) {
             $secao['ok']++;
+            return true;
         } else {
-            $secao['pulados']++;
+            $secao['pulados']++; // já existia
+            return true; // considera sucesso (já estava lá)
         }
     } catch (PDOException $e) {
-        // Código 23000 = duplicate key — não é erro crítico
         $code = (string)$e->getCode();
-        if ($code === '23000' || $code === '23505') {
+        // 23505 = unique violation (pgsql) | 23000 = constraint (mysql)
+        // Nestes casos o registro já existe → pular silenciosamente
+        if (in_array($code, ['23000', '23505'])) {
             $secao['pulados']++;
-        } else {
-            $secao['pulados']++;
-            $secao['erros'][] = "[{$tabela}] id={$dados['id']}: " . $e->getMessage();
+            return true;
+        }
+        // Outros erros: registrar mas não parar
+        $secao['pulados']++;
+        $secao['erros'][] = "[{$tabela}] {$dados['id']}: " . $e->getMessage();
+        return false;
+    }
+}
+
+// ── Buscar colunas ─────────────────────────────────────────────
+$colsC = colunas($pdo, 'clientes');
+$colsP = colunas($pdo, 'pedidos');
+$colsF = colunas($pdo, 'financeiro');
+$colsR = colunas($pdo, 'produtos');
+
+// ── Monta registro filtrando só colunas existentes ─────────────
+function montar($src, $cols, $tabela = '') {
+    if (!is_array($src)) return null;
+
+    $id = $src['id'] ?? generateUUID();
+    $reg = ['id' => $id];
+
+    foreach ($cols as $col) {
+        if ($col === 'id' || $col === 'created_at' || $col === 'updated_at') continue;
+        if (!array_key_exists($col, $src)) continue;
+        $v = $src[$col];
+        // Converter string vazia para null
+        if ($v === '' || $v === 'null') $v = null;
+        // Converter booleanos
+        if (is_bool($v)) $v = (int)$v;
+        $reg[$col] = $v;
+    }
+
+    // Correções por tabela
+    if ($tabela === 'clientes') {
+        $cpf = preg_replace('/[^0-9]/', '', (string)($reg['cpf'] ?? ''));
+        if (empty($cpf)) {
+            $cpf = 'SEMCPF' . strtoupper(substr(str_replace('-', '', $id), 0, 11));
+        }
+        $reg['cpf'] = $cpf;
+        if (empty($reg['nome'])) $reg['nome'] = 'Cliente sem nome';
+    }
+
+    if ($tabela === 'pedidos') {
+        $validos = ['Novo','Fechado','Em Produção','Aguardando Aprovação','Aprovado','Entregue','Cancelado'];
+        if (empty($reg['status']) || !in_array($reg['status'], $validos)) {
+            $reg['status'] = 'Novo';
         }
     }
+
+    return $reg;
 }
 
-// ── Buscar colunas de cada tabela ────────────────────────────
-$colsClientes   = obterColunas($pdo, 'clientes');
-$colsPedidos    = obterColunas($pdo, 'pedidos');
-$colsFinanceiro = obterColunas($pdo, 'financeiro');
-$colsProdutos   = obterColunas($pdo, 'produtos');
-
-// ── 1. CLIENTES ───────────────────────────────────────────────
-foreach (($dados['clientes'] ?? []) as $c) {
-    if (!is_array($c)) continue;
-    $reg = filtrarRegistro($c, $colsClientes, 'clientes');
-    inserirRegistro($pdo, 'clientes', $reg, $rel['clientes'], $isMySQL);
+// ════════════════════════════════════════════════════════════════
+// 1. CLIENTES
+// ════════════════════════════════════════════════════════════════
+foreach (($dados['clientes'] ?? []) as $src) {
+    $reg = montar($src, $colsC, 'clientes');
+    if (!$reg) { $rel['clientes']['pulados']++; continue; }
+    $ok = inserir($pdo, 'clientes', $reg, $rel['clientes'], $isPgsql);
+    if ($ok) $idsClientesImportados[$reg['id']] = true;
 }
 
-// ── 2. PRODUTOS ───────────────────────────────────────────────
-if (!empty($colsProdutos)) {
-    foreach (($dados['produtos'] ?? []) as $p) {
-        if (!is_array($p)) continue;
-        $reg = filtrarRegistro($p, $colsProdutos);
-        inserirRegistro($pdo, 'produtos', $reg, $rel['produtos'], $isMySQL);
+// ════════════════════════════════════════════════════════════════
+// 2. PRODUTOS
+// ════════════════════════════════════════════════════════════════
+if (!empty($colsR)) {
+    foreach (($dados['produtos'] ?? []) as $src) {
+        $reg = montar($src, $colsR);
+        if (!$reg) { $rel['produtos']['pulados']++; continue; }
+        inserir($pdo, 'produtos', $reg, $rel['produtos'], $isPgsql);
     }
 }
 
-// ── 3. PEDIDOS ────────────────────────────────────────────────
-foreach (($dados['pedidos'] ?? []) as $p) {
-    if (!is_array($p)) continue;
-    $reg = filtrarRegistro($p, $colsPedidos, 'pedidos');
-    inserirRegistro($pdo, 'pedidos', $reg, $rel['pedidos'], $isMySQL);
+// ════════════════════════════════════════════════════════════════
+// 3. PEDIDOS — resolve FK: se cliente não existe, seta NULL
+// ════════════════════════════════════════════════════════════════
+// Busca IDs de clientes já existentes no banco
+$clientesNoBanco = [];
+try {
+    $rows = $pdo->query('SELECT id FROM clientes')->fetchAll(PDO::FETCH_COLUMN);
+    foreach ($rows as $cid) $clientesNoBanco[$cid] = true;
+} catch (Exception $e) {}
+
+foreach (($dados['pedidos'] ?? []) as $src) {
+    $reg = montar($src, $colsP, 'pedidos');
+    if (!$reg) { $rel['pedidos']['pulados']++; continue; }
+
+    // FK: se cliente_id não existe no banco → NULL (evita erro de FK)
+    if (!empty($reg['cliente_id'])) {
+        if (!isset($clientesNoBanco[$reg['cliente_id']]) &&
+            !isset($idsClientesImportados[$reg['cliente_id']])) {
+            $reg['cliente_id'] = null;
+        }
+    }
+
+    $ok = inserir($pdo, 'pedidos', $reg, $rel['pedidos'], $isPgsql);
+    if ($ok) $idsPedidosImportados[$reg['id']] = true;
 }
 
-// ── 4. FINANCEIRO ─────────────────────────────────────────────
-foreach (($dados['financeiro'] ?? []) as $f) {
-    if (!is_array($f)) continue;
-    $reg = filtrarRegistro($f, $colsFinanceiro);
-    inserirRegistro($pdo, 'financeiro', $reg, $rel['financeiro'], $isMySQL);
+// ════════════════════════════════════════════════════════════════
+// 4. FINANCEIRO — resolve FK: se pedido não existe, seta NULL
+// ════════════════════════════════════════════════════════════════
+$pedidosNoBanco = [];
+try {
+    $rows = $pdo->query('SELECT id FROM pedidos')->fetchAll(PDO::FETCH_COLUMN);
+    foreach ($rows as $pid) $pedidosNoBanco[$pid] = true;
+} catch (Exception $e) {}
+
+foreach (($dados['financeiro'] ?? []) as $src) {
+    $reg = montar($src, $colsF);
+    if (!$reg) { $rel['financeiro']['pulados']++; continue; }
+
+    // FK: se pedido_id não existe → NULL
+    if (!empty($reg['pedido_id'])) {
+        if (!isset($pedidosNoBanco[$reg['pedido_id']]) &&
+            !isset($idsPedidosImportados[$reg['pedido_id']])) {
+            $reg['pedido_id'] = null;
+        }
+    }
+
+    inserir($pdo, 'financeiro', $reg, $rel['financeiro'], $isPgsql);
 }
 
-// ── Reabilitar FK ─────────────────────────────────────────────
-if ($isMySQL) {
-    try { $pdo->exec('SET FOREIGN_KEY_CHECKS = 1'); } catch (Exception $e) {}
-} else {
-    try { $pdo->exec('SET session_replication_role = DEFAULT'); } catch (Exception $e) {}
-}
-
-// ── Resposta ──────────────────────────────────────────────────
-$totalOk     = $rel['clientes']['ok'] + $rel['produtos']['ok']
-             + $rel['pedidos']['ok']  + $rel['financeiro']['ok'];
-$totalPulados = $rel['clientes']['pulados'] + $rel['produtos']['pulados']
-              + $rel['pedidos']['pulados']   + $rel['financeiro']['pulados'];
+// ── Totais ─────────────────────────────────────────────────────
+$totalOk     = array_sum(array_column($rel, 'ok'));
+$totalPulados = array_sum(array_column($rel, 'pulados'));
 
 jsonResponse([
     'sucesso'       => true,
