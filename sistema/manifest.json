@@ -1,0 +1,36 @@
+{
+  "name": "Raíz & Pixel — Gestão",
+  "short_name": "Raíz & Pixel",
+  "description": "Sistema de gestão de pedidos, clientes e financeiro da Raíz & Pixel Convites.",
+  "start_url": "app.html",
+  "display": "standalone",
+  "background_color": "#0f0f1a",
+  "theme_color": "#9b59b6",
+  "orientation": "any",
+  "lang": "pt-BR",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "img/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "img/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Novo Pedido",
+      "short_name": "Pedido",
+      "description": "Abrir tela de pedidos",
+      "url": "app.html#pedidos",
+      "icons": [{ "src": "img/logo.png", "sizes": "96x96" }]
+    }
+  ]
+}

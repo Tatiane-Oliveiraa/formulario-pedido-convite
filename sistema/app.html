@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Raíz & Pixel — Painel de Gestão</title>
+  <meta name="description" content="Sistema de gestão de pedidos, clientes e financeiro da Raíz & Pixel Convites." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=10" />
+  <link rel="icon" type="image/png" href="img/logo.png" />
+  <link rel="apple-touch-icon" href="img/logo.png" />
+  <!-- PWA — Manifest e metas de instalação -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#9b59b6" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Raíz &amp; Pixel" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Input oculto para importar backup -->
+  <input type="file" id="input-importar-backup" accept=".json" style="display:none;" onchange="importarDados(this.files[0])" />
+</head>
+<body onload="Auth.checkAuth()">
+
+  <!-- URL da API — altere para a URL do Render após o deploy -->
+  <script>
+    // Local (XAMPP): http://localhost/sistema/api
+    // Render: https://seu-app.onrender.com/api
+    window.RP_API_URL = 'https://raiz-pixel-api.onrender.com/api';
+  </script>
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Mobile Menu Button -->
+  <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">☰</button>
+
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <img src="img/logo.png" alt="Raíz &amp; Pixel Logo" class="sidebar-logo-img" />
+          <div class="sidebar-logo-text">
+            <h1>Raíz &amp; Pixel</h1>
+            <p>Painel de Gestão</p>
+          </div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-item active" id="nav-dashboard" data-section="dashboard" onclick="showSection('dashboard')">
+          <span class="nav-icon">📊</span> Dashboard
+        </div>
+        <div class="nav-item" id="nav-clientes" data-section="clientes" onclick="showSection('clientes')">
+          <span class="nav-icon">👥</span> Clientes
+        </div>
+        <div class="nav-item" id="nav-pedidos" data-section="pedidos" onclick="showSection('pedidos')">
+          <span class="nav-icon">📋</span> Pedidos
+          <span class="nav-badge" id="pedidos-badge" style="display:none;"></span>
+        </div>
+        <div class="nav-item" id="nav-produtos" data-section="produtos" onclick="showSection('produtos')">
+          <span class="nav-icon">📦</span> Produtos
+        </div>
+        <div class="nav-item" id="nav-financeiro" data-section="financeiro" onclick="showSection('financeiro')">
+          <span class="nav-icon">💰</span> Financeiro
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="nav-item" id="btn-instalar-app" onclick="instalarApp()" title="Instalar como app no desktop" style="display:none; background: linear-gradient(90deg,#6c3483,#9b59b6); border-radius:8px; margin-bottom:4px;">
+          <span class="nav-icon">📲</span> Instalar App
+        </div>
+        <div class="nav-item" onclick="exportarDados()" title="Exportar backup dos dados">
+          <span class="nav-icon">💾</span> Backup
+        </div>
+        <div class="nav-item" onclick="document.getElementById('input-importar-backup').click()" title="Restaurar backup">
+          <span class="nav-icon">📂</span> Restaurar
+        </div>
+        <div class="nav-item" id="btn-logout" onclick="Auth.logout()">
+          <span class="nav-icon">🚪</span> Sair
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+
+      <!-- ===== SECTION: Dashboard ===== -->
+      <section class="page-section active" id="section-dashboard">
+        <div class="page-header">
+          <h1 class="page-title">Dashboard</h1>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card" id="stat-pedidos-mes">
+            <div class="stat-label">Pedidos no Mês</div>
+            <div class="stat-value">0</div>
+          </div>
+          <div class="stat-card" id="stat-pedidos-novos">
+            <div class="stat-label">Pedidos Novos</div>
+            <div class="stat-value">0</div>
+          </div>
+          <div class="stat-card" id="stat-faturamento-mes">
+            <div class="stat-label">Faturamento Mensal</div>
+            <div class="stat-value">R$ 0,00</div>
+          </div>
+          <div class="stat-card" id="stat-faturamento-dia">
+            <div class="stat-label">Faturamento Hoje</div>
+            <div class="stat-value">R$ 0,00</div>
+          </div>
+        </div>
+        <div class="dashboard-grid">
+          <!-- Painel 1: Pedidos em Andamento -->
+          <div class="card dashboard-card-andamento">
+            <div class="card-header">
+              <h3>🏭 Pedidos em Andamento</h3>
+              <span class="card-header-hint">Em Produção &amp; Aguardando Aprovação</span>
+            </div>
+            <div class="card-body" style="padding:0;">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Cliente</th>
+                      <th>Aniversariante</th>
+                      <th>Status</th>
+                      <th>⏱ Prazo Restante</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashboard-pedidos-andamento"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <!-- Painel 2: Repostagem Pendente -->
+          <div class="card dashboard-card-repost">
+            <div class="card-header">
+              <h3>🔄 Repostagem Pendente</h3>
+              <span class="card-header-hint">Ordenado por data mais próxima</span>
+            </div>
+            <div class="card-body" style="padding:0;">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Aniversariante</th>
+                      <th>Data</th>
+                      <th>⏱ Tempo Restante</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashboard-repostagem"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SECTION: Clientes ===== -->
+      <section class="page-section" id="section-clientes">
+        <div class="page-header">
+          <h1 class="page-title">Clientes</h1>
+          <div class="page-actions">
+            <button class="btn btn-primary" id="btn-novo-cliente" onclick="openModalCliente()">＋ Nova Cliente</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <input type="text" class="search-input" id="clientes-search" placeholder="Buscar por nome ou CPF..." oninput="filterClientes()" />
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Data Cadastro</th>
+                    <th>Pedidos</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="clientes-lista"></tbody>
+              </table>
+            </div>
+            <div class="empty-state" id="clientes-empty" style="display:none;">
+              <div class="empty-icon">👥</div>
+              <p>Nenhuma cliente encontrada</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SECTION: Cliente Detalhe ===== -->
+      <section class="page-section" id="section-cliente-detalhe">
+        <div class="page-header">
+          <button class="btn btn-secondary" id="btn-voltar-clientes" onclick="showSection('clientes')">← Voltar</button>
+          <h1 class="page-title" id="detalhe-cliente-titulo">Cliente</h1>
+          <div class="page-actions">
+            <button class="btn btn-secondary" id="btn-editar-cliente" onclick="editarClienteAtual()">Editar</button>
+            <button class="btn btn-primary" id="btn-gerar-pdf-cliente" onclick="gerarPDFClienteAtual()">📄 Gerar PDF</button>
+          </div>
+        </div>
+        <div class="info-grid">
+          <div class="info-card">
+            <div class="info-label">Nome completo</div>
+            <div class="info-value" id="detalhe-cliente-nome">—</div>
+          </div>
+          <div class="info-card">
+            <div class="info-label">CPF</div>
+            <div class="info-value" id="detalhe-cliente-cpf">—</div>
+          </div>
+          <div class="info-card">
+            <div class="info-label">Cadastrada em</div>
+            <div class="info-value" id="detalhe-cliente-data">—</div>
+          </div>
+          <div class="info-card">
+            <div class="info-label">Total de Pedidos</div>
+            <div class="info-value" id="detalhe-cliente-total-pedidos">0</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Histórico de Pedidos</h3></div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Pedido</th>
+                    <th>Evento</th>
+                    <th>Data</th>
+                    <th>Status</th>
+                    <th>Valor</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="detalhe-cliente-pedidos"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SECTION: Pedidos ===== -->
+      <section class="page-section" id="section-pedidos">
+        <div class="page-header">
+          <h1 class="page-title">Pedidos</h1>
+          <div class="page-actions">
+            <button class="btn btn-primary" id="btn-novo-pedido" onclick="openModalPedido()">＋ Novo Pedido</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="filter-bar" style="margin-bottom:0;">
+              <input type="text" class="search-input" id="pedidos-search" placeholder="Buscar..." oninput="filterPedidos()" />
+              <select class="search-input" id="pedidos-filtro-status" style="max-width:200px;" onchange="filterPedidos()">
+                <option value="">Todos os Status</option>
+                <option value="Novo">Novo</option>
+                <option value="Fechado">Fechado</option>
+                <option value="Em Produção">Em Produção</option>
+                <option value="Aguardando Aprovação">Aguardando Aprovação</option>
+                <option value="Aprovado">Aprovado</option>
+                <option value="Entregue">Entregue</option>
+                <option value="Cancelado">Cancelado</option>
+              </select>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Cliente</th>
+                    <th>Aniversariante</th>
+                    <th>Evento</th>
+                    <th>Modelo</th>
+                    <th>Status</th>
+                    <th>Valor</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="pedidos-lista"></tbody>
+              </table>
+            </div>
+            <div class="empty-state" id="pedidos-empty" style="display:none;">
+              <div class="empty-icon">📋</div>
+              <p>Nenhum pedido encontrado</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SECTION: Pedido Detalhe ===== -->
+      <section class="page-section" id="section-pedido-detalhe">
+        <div class="page-header">
+          <button class="btn btn-secondary" id="btn-voltar-pedidos" onclick="showSection('pedidos')">← Voltar</button>
+          <h1 class="page-title" id="detalhe-pedido-titulo">Pedido</h1>
+          <div class="page-actions">
+            <button class="btn btn-secondary" id="btn-editar-pedido" onclick="openEditarPedido()" title="Editar dados do pedido">✏️ Editar Dados</button>
+            <button class="btn btn-secondary" id="btn-pdf-pedido" onclick="generatePedidoPDF(window._currentPedido?.id)" title="Exportar PDF deste pedido">📄 Exportar PDF</button>
+            <button class="btn btn-primary" id="btn-salvar-pedido" onclick="salvarPedidoDetalhe()">💾 Salvar Alterações</button>
+            <button class="btn btn-danger" id="btn-excluir-pedido" onclick="excluirPedido(window._currentPedido?.id, window._currentPedido?.nome_aniversariante)" title="Excluir pedido">🗑 Excluir</button>
+          </div>
+        </div>
+        <div class="detail-grid">
+          <!-- Left Column: Readonly form data -->
+          <div class="detail-col">
+            <div class="card">
+              <div class="card-title">Dados do Contratante</div>
+              <div class="card-content">
+                <div class="info-label">Nome</div>
+                <div class="info-value" id="pedido-cliente-nome">—</div>
+                <div class="info-label" style="margin-top:12px;">CPF</div>
+                <div class="info-value" id="pedido-cliente-cpf">—</div>
+                <div class="info-label" style="margin-top:12px;">Telefone / WhatsApp</div>
+                <div class="info-value" id="pedido-cliente-telefone">—</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Detalhes do Evento</div>
+              <div class="card-content">
+                <div class="info-label">Aniversariante</div>
+                <div class="info-value" id="pedido-aniversariante">—</div>
+                <div class="info-label" style="margin-top:10px;">Data do Evento</div>
+                <div class="info-value" id="pedido-data-evento">—</div>
+                <div class="info-label" style="margin-top:10px;">Horário</div>
+                <div class="info-value" id="pedido-hora">—</div>
+                <div class="info-label" style="margin-top:10px;">Local</div>
+                <div class="info-value" id="pedido-local">—</div>
+                <div class="info-label" style="margin-top:10px;">Tema da Festa</div>
+                <div class="info-value" id="pedido-tema">—</div>
+                <div class="info-label" style="margin-top:10px;">Trilha Sonora</div>
+                <div class="info-value" id="pedido-trilha">—</div>
+                <div class="info-label" style="margin-top:10px;">Dress Code</div>
+                <div class="info-value" id="pedido-dresscode">—</div>
+                <div class="info-label" style="margin-top:10px;">Paleta de Cores</div>
+                <div class="info-value" id="pedido-paleta">—</div>
+                <div class="info-label" style="margin-top:10px;">Confirmação de Presença</div>
+                <div class="info-value" id="pedido-confirmacao">—</div>
+                <div class="info-label" style="margin-top:10px;">WhatsApp Confirmação</div>
+                <div class="info-value" id="pedido-whatsapp-conf">—</div>
+                <div class="info-label" style="margin-top:10px;">Mensagem de Confirmação</div>
+                <div class="info-value" id="pedido-mensagem-confirmacao">—</div>
+                <div class="info-label" style="margin-top:10px;">Cores do Convite</div>
+                <div class="info-value" id="pedido-cores-convite">—</div>
+                <div class="info-label" style="margin-top:10px;">Sugestões de Presente</div>
+                <div class="info-value" id="pedido-sugestoes">—</div>
+                <div class="info-label" style="margin-top:10px;">Chave Pix</div>
+                <div class="info-value" id="pedido-chave-pix-info">—</div>
+                <div class="info-label" style="margin-top:10px;">Manual do Convidado</div>
+                <div class="info-value" id="pedido-manual-convidado">—</div>
+                <div class="info-label" style="margin-top:10px;">Outros Detalhes</div>
+                <div class="info-value" id="pedido-outros">—</div>
+                <div class="info-label" style="margin-top:10px;">Observações da Cliente</div>
+                <div class="info-value" id="pedido-observacoes-cliente">—</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Produto Contratado</div>
+              <div class="card-content">
+                <div class="info-label">Modelo</div>
+                <div class="info-value" id="pedido-modelo">—</div>
+                <div class="info-label" style="margin-top:10px;">Botões Interativos</div>
+                <div class="info-value" id="pedido-botoes">—</div>
+                <div class="info-label" style="margin-top:10px;">Complementos</div>
+                <div class="info-value" id="pedido-complementos">—</div>
+                <div class="info-label" style="margin-top:10px;">Forma de Pagamento</div>
+                <div class="info-value" id="pedido-pagamento">—</div>
+                <div class="info-label" style="margin-top:10px;">Subtotal</div>
+                <div class="info-value" id="pedido-subtotal">—</div>
+                <div class="info-label" style="margin-top:10px;">Valor Total</div>
+                <div class="info-value" id="pedido-valor-total-info">—</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Editable admin fields -->
+          <div class="detail-col">
+            <div class="card">
+              <div class="card-title">Gerenciamento do Pedido</div>
+              <div class="card-content">
+                <div class="form-group">
+                  <label for="pedido-status">Status</label>
+                  <select id="pedido-status" onchange="onStatusChange()">
+                    <option value="Novo">Novo</option>
+                    <option value="Fechado">Fechado</option>
+                    <option value="Em Produção">Em Produção</option>
+                    <option value="Aguardando Aprovação">Aguardando Aprovação</option>
+                    <option value="Aprovado">Aprovado</option>
+                    <option value="Entregue">Entregue</option>
+                    <option value="Cancelado">Cancelado</option>
+                  </select>
+                </div>
+                <div class="form-group" id="grupo-sinal" style="display:none;">
+                  <label for="pedido-valor-sinal">Valor do Sinal (R$)</label>
+                  <input type="number" id="pedido-valor-sinal" step="0.01" min="0" placeholder="0,00" oninput="calcularRestante()" />
+                </div>
+                <div class="form-group" id="grupo-restante">
+                  <label for="pedido-valor-restante">Valor Restante (R$)</label>
+                  <input type="number" id="pedido-valor-restante" step="0.01" min="0" placeholder="0,00" />
+                </div>
+                <div class="form-group">
+                  <label for="pedido-valor-total-edit">💰 Valor Total (R$)</label>
+                  <input type="number" id="pedido-valor-total-edit" step="0.01" min="0" placeholder="0,00" oninput="onValorTotalEditado()" />
+                  <small style="color:var(--text-secondary);font-size:0.78rem;">Edite aqui para sobrescrever o valor total do pedido</small>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Links e Arquivos</div>
+              <div class="card-content">
+                <div class="form-group">
+                  <label for="pedido-link-canva">Link Canva</label>
+                  <input type="text" id="pedido-link-canva" placeholder="https://..." />
+                </div>
+                <div class="form-group">
+                  <label for="pedido-link-convite">Link do Convite</label>
+                  <input type="text" id="pedido-link-convite" placeholder="https://..." />
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Repostagem</div>
+              <div class="card-content">
+                <div class="form-group">
+                  <label for="pedido-precisa-repostar">Precisa Repostar?</label>
+                  <select id="pedido-precisa-repostar" onchange="toggleRepostagem()">
+                    <option value="false">Não</option>
+                    <option value="true">Sim</option>
+                  </select>
+                </div>
+                <div class="form-group" id="grupo-data-repostagem" style="display:none;">
+                  <label for="pedido-data-repostagem">Data de Repostagem</label>
+                  <input type="date" id="pedido-data-repostagem" />
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Observações Internas</div>
+              <div class="card-content">
+                <div class="form-group">
+                  <textarea id="pedido-observacoes-internas" rows="4" placeholder="Notas internas sobre este pedido..."></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Itens / Serviços Extras</div>
+              <div class="card-content">
+                <div class="extras-add-form">
+                  <div class="form-group" style="flex:1;margin-bottom:0;">
+                    <input type="text" id="input-extra-descricao" placeholder="Descrição do serviço extra" />
+                  </div>
+                  <div class="form-group" style="width:120px;margin-bottom:0;">
+                    <input type="number" id="input-extra-valor" step="0.01" min="0" placeholder="Valor R$" />
+                  </div>
+                  <button class="btn btn-primary btn-sm" onclick="adicionarItemExtra()" title="Adicionar item">＋</button>
+                </div>
+                <div id="lista-itens-extras" class="extras-list"></div>
+                <div class="extras-totals">
+                  <div class="extras-total-row">
+                    <span>Subtotal Original:</span>
+                    <span id="extras-subtotal-original">R$ 0,00</span>
+                  </div>
+                  <div class="extras-total-row">
+                    <span>Total Extras:</span>
+                    <span id="extras-total-extras">R$ 0,00</span>
+                  </div>
+                  <div class="extras-total-row extras-total-final">
+                    <span>Novo Valor Total:</span>
+                    <span id="extras-novo-total">R$ 0,00</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SECTION: Financeiro ===== -->
+      <section class="page-section" id="section-financeiro">
+        <div class="page-header">
+          <h1 class="page-title">Financeiro</h1>
+          <div class="page-actions">
+            <button class="btn btn-primary" id="btn-nova-movimentacao" onclick="openModalFinanceiro()">＋ Nova Movimentação</button>
+            <button class="btn btn-secondary" id="btn-gerar-relatorio-mensal" onclick="gerarRelatorioAtual()">📊 Relatório Mensal</button>
+          </div>
+        </div>
+        <div class="filter-bar">
+          <select class="search-input" id="financeiro-mes" style="max-width:160px;" onchange="initFinanceiro()"></select>
+          <select class="search-input" id="financeiro-ano" style="max-width:120px;" onchange="initFinanceiro()"></select>
+        </div>
+        <div class="stat-grid stat-grid-3">
+          <div class="stat-card stat-success" id="card-entradas">
+            <div class="stat-label">Total Entradas</div>
+            <div class="stat-value" id="financeiro-total-entradas">R$ 0,00</div>
+          </div>
+          <div class="stat-card stat-danger" id="card-saidas">
+            <div class="stat-label">Total Saídas</div>
+            <div class="stat-value" id="financeiro-total-saidas">R$ 0,00</div>
+          </div>
+          <div class="stat-card" id="card-saldo">
+            <div class="stat-label">Saldo</div>
+            <div class="stat-value" id="financeiro-saldo">R$ 0,00</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    <th>Descrição</th>
+                    <th>Categoria</th>
+                    <th>Pedido</th>
+                    <th>Valor</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="financeiro-lista"></tbody>
+              </table>
+            </div>
+            <div class="empty-state" id="financeiro-empty" style="display:none;">
+              <div class="empty-icon">💰</div>
+              <p>Nenhuma movimentação neste período</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SECTION: Produtos / Catálogo ===== -->
+      <section class="page-section" id="section-produtos">
+        <div class="page-header">
+          <h1 class="page-title">Catálogo de Serviços</h1>
+          <div class="page-actions">
+            <button class="btn btn-primary" onclick="openModalNovoProduto()">＋ Novo Produto</button>
+          </div>
+        </div>
+        <div id="produtos-tabela-container">
+          <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <p>Carregando catálogo...</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===== MODAL: Nova Cliente ===== -->
+  <div class="modal-overlay" id="modal-cliente">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-cliente-title">Nova Cliente</h2>
+        <button class="modal-close" onclick="closeModal('modal-cliente')">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-cliente">
+          <div class="form-group">
+            <label for="input-cliente-nome">Nome Completo</label>
+            <input type="text" id="input-cliente-nome" required placeholder="Nome da cliente" />
+          </div>
+          <div class="form-group">
+            <label for="input-cliente-cpf">CPF</label>
+            <input type="text" id="input-cliente-cpf" required placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)" />
+          </div>
+          <div class="form-group">
+            <label for="input-cliente-telefone">Telefone / WhatsApp</label>
+            <input type="text" id="input-cliente-telefone" placeholder="(00) 00000-0000" />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-cancelar-cliente" onclick="closeModal('modal-cliente')">Cancelar</button>
+        <button class="btn btn-primary" id="btn-salvar-cliente" onclick="salvarCliente()">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Novo Pedido Manual ===== -->
+  <div class="modal-overlay" id="modal-pedido">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h2 class="modal-title">Novo Pedido</h2>
+        <button class="modal-close" onclick="closeModal('modal-pedido')">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-pedido">
+
+          <!-- ── BLOCO 1: Quem é o cliente? ─────────────────────── -->
+          <div style="background:var(--surface-2,#f8f4ff);border-radius:10px;padding:16px 18px;margin-bottom:18px;border-left:4px solid var(--primary,#9b59b6);">
+            <div style="font-weight:700;font-size:1rem;margin-bottom:12px;color:var(--primary,#9b59b6);">👤 Dados da Cliente</div>
+            <div class="form-group" style="margin-bottom:10px;">
+              <label for="input-pedido-cliente">Cliente *</label>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <select id="input-pedido-cliente" required style="flex:1;" onchange="onClienteChangePedido(this)">
+                  <option value="">Selecione uma cliente...</option>
+                </select>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openModalClienteRapido()" title="Cadastrar nova cliente" style="white-space:nowrap;">＋ Nova</button>
+              </div>
+            </div>
+            <!-- Telefone exibido automaticamente ao selecionar cliente -->
+            <div id="pedido-telefone-display" style="display:none;background:#fff;border-radius:6px;padding:8px 12px;font-size:0.92rem;border:1px solid var(--border,#e0d6f7);">
+              📞 <strong>Telefone:</strong> <span id="pedido-telefone-valor">—</span>
+            </div>
+          </div>
+
+          <!-- ── BLOCO 2: Produto / Convite ──────────────────────── -->
+          <div style="background:var(--surface-2,#f8f4ff);border-radius:10px;padding:16px 18px;margin-bottom:18px;border-left:4px solid #27ae60;">
+            <div style="font-weight:700;font-size:1rem;margin-bottom:12px;color:#27ae60;">📦 Produto Contratado</div>
+            <div class="form-group" style="margin-bottom:10px;">
+              <label for="input-pedido-modelo">Modelo de Convite *</label>
+              <select id="input-pedido-modelo">
+                <option value="" data-price="0">Selecione um modelo...</option>
+                <optgroup label="Coleção 15 Anos/Casamento/Festas em Geral">
+                  <option value="Convite Interativo Luxo" data-price="79.99">Convite Interativo Luxo - R$ 79,99</option>
+                  <option value="Convite Interativo Premium" data-price="95.00">Convite Interativo Premium - R$ 95,00</option>
+                  <option value="Convite Interativo Gold" data-price="130.00">Convite Interativo Gold - R$ 130,00</option>
+                  <option value="Convite Interativo Gold II" data-price="160.00">Convite Interativo Gold II - R$ 160,00</option>
+                  <option value="Convite Interativo Infinito" data-price="99.00">Convite Interativo Infinito - R$ 99,00</option>
+                  <option value="Convite Interativo Especial Plus" data-price="110.00">Convite Interativo Especial Plus - R$ 110,00</option>
+                </optgroup>
+                <optgroup label="Coleção Infantil">
+                  <option value="Convite Tradicional" data-price="24.99">Convite Tradicional - R$ 24,99</option>
+                  <option value="Convite Interativo Simples" data-price="35.00">Convite Interativo Simples - R$ 35,00</option>
+                  <option value="Convite Interativo Musical" data-price="40.00">Convite Interativo Musical - R$ 40,00</option>
+                  <option value="Convite Interativo Plus" data-price="45.00">Convite Interativo Plus - R$ 45,00</option>
+                  <option value="Convite Interativo Especial" data-price="60.00">Convite Interativo Especial - R$ 60,00</option>
+                  <option value="Convite Interativo Luxo Infantil" data-price="80.00">Convite Interativo Luxo Infantil - R$ 80,00</option>
+                  <option value="Convite Interativo Premium Infantil" data-price="95.00">Convite Interativo Premium Infantil - R$ 95,00</option>
+                  <option value="Convite Interativo Gold Infantil" data-price="130.00">Convite Interativo Gold Infantil - R$ 130,00</option>
+                  <option value="Convite Interativo Gold II Infantil" data-price="199.00">Convite Interativo Gold II Infantil - R$ 199,00</option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:10px;">
+              <label>Botões Interativos</label>
+              <div class="checkbox-grid">
+                <label><input type="checkbox" class="modal-botao-checkbox" value="Localizacao" /> Localização</label>
+                <label><input type="checkbox" class="modal-botao-checkbox" value="Confirmação de presença" /> Confirmação de presença</label>
+                <label><input type="checkbox" class="modal-botao-checkbox" value="Sugestão de presentes" /> Sugestão de presentes</label>
+                <label><input type="checkbox" class="modal-botao-checkbox" value="Chave Pix" /> Chave Pix</label>
+                <label><input type="checkbox" class="modal-botao-checkbox" value="Dress code" /> Dress code</label>
+                <label><input type="checkbox" class="modal-botao-checkbox" value="Outros" /> Outros</label>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:10px;">
+              <label>Complementos</label>
+              <div class="checkbox-grid" id="modal-complementos-container">
+                <label><input type="checkbox" class="modal-comp-checkbox" data-price="30.00" /> Save the Date Estático (R$ 30,00)</label>
+                <label><input type="checkbox" class="modal-comp-checkbox" data-price="60.00" /> Save the Date Vídeo (R$ 60,00)</label>
+                <label><input type="checkbox" class="modal-comp-checkbox" data-price="89.90" /> Mascote Personalizado (1 posição) (R$ 89,90)</label>
+                <label><input type="checkbox" class="modal-comp-checkbox" data-price="120.00" /> Mascote Personalizado (3 posições) (R$ 120,00)</label>
+                <label><input type="checkbox" class="modal-comp-checkbox" data-price="39.99" /> Filtro + Placa QrCode (R$ 39,99)</label>
+                <label><input type="checkbox" class="modal-comp-checkbox" data-price="79.90" /> Ensaio fotográfico em IA (R$ 79,90)</label>
+                <label><input type="checkbox" class="modal-comp-checkbox" data-price="10.00" /> Foto no modelo do convite (R$ 10,00/foto)</label>
+                <label><input type="checkbox" class="modal-comp-checkbox" data-price="30.00" id="modal-urgencia-check" /> Taxa de urgência 24h (a partir de R$ 30,00)</label>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group" style="margin-bottom:0;">
+                <label for="input-pedido-album-fotos">Álbum de Fotos</label>
+                <select id="input-pedido-album-fotos">
+                  <option value="Nenhum">Nenhum</option>
+                  <option value="Plano Basic" data-price="149.00">Plano Basic - R$ 149,00</option>
+                  <option value="Plano Pro" data-price="197.00">Plano Pro - R$ 197,00</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label for="input-pedido-tipo-confirmacao">Confirmação de Presença</label>
+                <select id="input-pedido-tipo-confirmacao">
+                  <option value="">Selecione...</option>
+                  <option value="WhatsApp" data-price="0">WhatsApp (sem custo)</option>
+                  <option value="Formulário Simples" data-price="29.99">Formulário Simples - R$ 29,99</option>
+                  <option value="Formulário com QR Code" data-price="59.99">Formulário com QR Code - R$ 59,99</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group" style="margin-top:10px;margin-bottom:0;">
+              <label>Forma de Pagamento</label>
+              <div class="radio-group">
+                <label><input type="radio" name="modal-pagamento" value="Pix" /> Pix</label>
+                <label><input type="radio" name="modal-pagamento" value="Cartão" /> Cartão (+taxas)</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── BLOCO 3: Dados do Evento / Aniversariante ─────── -->
+          <div style="background:var(--surface-2,#f8f4ff);border-radius:10px;padding:16px 18px;margin-bottom:18px;border-left:4px solid #e67e22;">
+            <div style="font-weight:700;font-size:1rem;margin-bottom:12px;color:#e67e22;">🎉 Dados do Evento</div>
+            <div class="form-group">
+              <label for="input-pedido-aniversariante">Nome do(a) Aniversariante</label>
+              <input type="text" id="input-pedido-aniversariante" placeholder="Nome do(a) aniversariante" />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="input-pedido-data-evento">Data do Evento *</label>
+                <input type="date" id="input-pedido-data-evento" required />
+              </div>
+              <div class="form-group">
+                <label for="input-pedido-hora-evento">Horário *</label>
+                <input type="time" id="input-pedido-hora-evento" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="input-pedido-local-evento">Local do Evento</label>
+              <input type="text" id="input-pedido-local-evento" placeholder="Endereço do local" />
+            </div>
+            <div class="form-group">
+              <label for="input-pedido-tema-festa">Tema da Festa</label>
+              <input type="text" id="input-pedido-tema-festa" placeholder="Tema escolhido" />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="input-pedido-trilha-sonora">Trilha Sonora</label>
+                <input type="text" id="input-pedido-trilha-sonora" placeholder="Música de fundo" />
+              </div>
+              <div class="form-group">
+                <label for="input-pedido-dress-code">Dress Code</label>
+                <input type="text" id="input-pedido-dress-code" placeholder="Código de vestimenta" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="input-pedido-paleta-cores">Paleta de Cores</label>
+              <input type="text" id="input-pedido-paleta-cores" placeholder="Cores do evento" />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="input-pedido-confirmacao-presenca">Link Confirmação de Presença</label>
+                <input type="text" id="input-pedido-confirmacao-presenca" placeholder="Link ou instrução" />
+              </div>
+              <div class="form-group">
+                <label for="input-pedido-whatsapp-confirmacao">WhatsApp Confirmação</label>
+                <input type="text" id="input-pedido-whatsapp-confirmacao" placeholder="(00) 00000-0000" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="input-pedido-sugestoes-presente">Sugestões de Presente</label>
+              <textarea id="input-pedido-sugestoes-presente" rows="2" placeholder="Lista de sugestões"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="input-pedido-chave-pix">Chave Pix</label>
+              <input type="text" id="input-pedido-chave-pix" placeholder="CPF, e-mail, telefone ou chave aleatória" />
+            </div>
+            <div class="form-group">
+              <label for="input-pedido-outros-detalhes">Outros Detalhes</label>
+              <textarea id="input-pedido-outros-detalhes" rows="2" placeholder="Informações adicionais"></textarea>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="input-pedido-observacoes">Observações Internas</label>
+              <textarea id="input-pedido-observacoes" rows="2" placeholder="Observações da cliente"></textarea>
+            </div>
+          </div>
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-pedido')">Cancelar</button>
+        <button class="btn btn-primary" id="btn-salvar-novo-pedido" onclick="salvarNovoPedido()">Criar Pedido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Nova Movimentação ===== -->
+  <div class="modal-overlay" id="modal-financeiro">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Nova Movimentação</h2>
+        <button class="modal-close" onclick="closeModal('modal-financeiro')">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-financeiro">
+          <div class="form-group">
+            <label for="input-fin-tipo">Tipo</label>
+            <select id="input-fin-tipo">
+              <option value="entrada">Entrada</option>
+              <option value="saida">Saída</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="input-fin-descricao">Descrição</label>
+            <input type="text" id="input-fin-descricao" required placeholder="Descrição da movimentação" />
+          </div>
+          <div class="form-group" style="display: flex; gap: 15px; margin-bottom: 20px;">
+            <div style="flex: 1;">
+              <label for="input-fin-valor">Valor (R$)</label>
+              <input type="number" id="input-fin-valor" step="0.01" placeholder="0.00" />
+            </div>
+            <div style="flex: 1; display: flex; align-items: center; padding-top: 25px;">
+              <input type="checkbox" id="input-fin-cartao" style="width: auto; margin-right: 8px;">
+              <label for="input-fin-cartao" style="margin-bottom: 0; font-size: 0.85rem; font-weight: normal; color: #555; cursor: pointer;">Pagamento no Cartão<br><small>(desconta 8% na hora de salvar)</small></label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="input-fin-categoria">Categoria</label>
+            <select id="input-fin-categoria">
+              <option value="Sinal">Sinal</option>
+              <option value="Entrega Final">Entrega Final</option>
+              <option value="Venda Avulsa">Venda Avulsa</option>
+              <option value="Material">Material</option>
+              <option value="Ferramenta">Ferramenta</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-financeiro')">Cancelar</button>
+        <button class="btn btn-primary" id="btn-salvar-financeiro" onclick="salvarFinanceiro()">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmação Customizado (Padrão do Sistema) -->
+  <div class="modal-overlay" id="modal-confirm">
+    <div class="modal" style="max-width: 380px;">
+      <div class="modal-header">
+        <h2 class="modal-title" id="confirm-title" style="color: var(--danger);">Atenção</h2>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-message" style="color: var(--text-primary); font-size: 1.05rem;">Tem certeza que deseja excluir?</p>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button class="btn btn-secondary" id="btn-confirm-cancel">Cancelar</button>
+        <button class="btn btn-danger" id="btn-confirm-ok">Sim, Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Editar Dados do Pedido ===== -->
+  <div class="modal-overlay" id="modal-editar-pedido">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h2 class="modal-title">Editar Dados do Pedido</h2>
+        <button class="modal-close" onclick="closeModal('modal-editar-pedido')">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-editar-pedido">
+          <div class="form-group">
+            <label for="edit-aniversariante">Nome do(a) Aniversariante</label>
+            <input type="text" id="edit-aniversariante" placeholder="Nome do(a) aniversariante" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit-data-evento">Data do Evento</label>
+              <input type="date" id="edit-data-evento" />
+            </div>
+            <div class="form-group">
+              <label for="edit-hora-evento">Horário</label>
+              <input type="time" id="edit-hora-evento" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="edit-local-evento">Local do Evento</label>
+            <input type="text" id="edit-local-evento" placeholder="Endereço do local" />
+          </div>
+          <div class="form-group">
+            <label for="edit-tema-festa">Tema da Festa</label>
+            <input type="text" id="edit-tema-festa" placeholder="Tema escolhido" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit-trilha-sonora">Trilha Sonora</label>
+              <input type="text" id="edit-trilha-sonora" placeholder="Música de fundo" />
+            </div>
+            <div class="form-group">
+              <label for="edit-dress-code">Dress Code</label>
+              <input type="text" id="edit-dress-code" placeholder="Código de vestimenta" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit-paleta-cores">Paleta de Cores</label>
+              <input type="text" id="edit-paleta-cores" placeholder="Cores do evento" />
+            </div>
+            <div class="form-group">
+              <label for="edit-cores-convite">Cores do Convite</label>
+              <input type="text" id="edit-cores-convite" placeholder="Cores do convite" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit-confirmacao-presenca">Confirmação de Presença</label>
+              <input type="text" id="edit-confirmacao-presenca" placeholder="Tipo ou link" />
+            </div>
+            <div class="form-group">
+              <label for="edit-whatsapp-confirmacao">WhatsApp Confirmação</label>
+              <input type="text" id="edit-whatsapp-confirmacao" placeholder="(00) 00000-0000" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="edit-mensagem-confirmacao">Mensagem de Confirmação</label>
+            <textarea id="edit-mensagem-confirmacao" rows="2" placeholder="Mensagem para confirmação"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="edit-sugestoes-presente">Sugestões de Presente</label>
+            <textarea id="edit-sugestoes-presente" rows="2" placeholder="Lista de sugestões"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="edit-chave-pix">Chave Pix</label>
+            <input type="text" id="edit-chave-pix" placeholder="CPF, e-mail, telefone ou chave aleatória" />
+          </div>
+          <div class="form-group">
+            <label for="edit-manual-convidado">Manual do Convidado</label>
+            <textarea id="edit-manual-convidado" rows="2" placeholder="Informações do manual"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="edit-outros-detalhes">Outros Detalhes</label>
+            <textarea id="edit-outros-detalhes" rows="2" placeholder="Informações adicionais"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="edit-observacoes">Observações da Cliente</label>
+            <textarea id="edit-observacoes" rows="2" placeholder="Observações"></textarea>
+          </div>
+          <hr style="border:none;border-top:1.5px solid var(--border);margin:20px 0;" />
+          <div class="form-group">
+            <label for="edit-modelo">Modelo de Convite</label>
+            <select id="edit-modelo">
+              <option value="" data-price="0">Selecione um modelo...</option>
+              <optgroup label="Coleção 15 Anos/Casamento/Festas em Geral">
+                <option value="Convite Interativo Luxo" data-price="79.99">Convite Interativo Luxo - R$ 79,99</option>
+                <option value="Convite Interativo Premium" data-price="95.00">Convite Interativo Premium - R$ 95,00</option>
+                <option value="Convite Interativo Gold" data-price="130.00">Convite Interativo Gold - R$ 130,00</option>
+                <option value="Convite Interativo Gold II" data-price="160.00">Convite Interativo Gold II - R$ 160,00</option>
+                <option value="Convite Interativo Infinito" data-price="99.00">Convite Interativo Infinito - R$ 99,00</option>
+                <option value="Convite Interativo Especial Plus" data-price="110.00">Convite Interativo Especial Plus - R$ 110,00</option>
+              </optgroup>
+              <optgroup label="Coleção Infantil">
+                <option value="Convite Tradicional" data-price="24.99">Convite Tradicional - R$ 24,99</option>
+                <option value="Convite Interativo Simples" data-price="35.00">Convite Interativo Simples - R$ 35,00</option>
+                <option value="Convite Interativo Musical" data-price="40.00">Convite Interativo Musical - R$ 40,00</option>
+                <option value="Convite Interativo Plus" data-price="45.00">Convite Interativo Plus - R$ 45,00</option>
+                <option value="Convite Interativo Especial" data-price="60.00">Convite Interativo Especial - R$ 60,00</option>
+                <option value="Convite Interativo Luxo Infantil" data-price="80.00">Convite Interativo Luxo Infantil - R$ 80,00</option>
+                <option value="Convite Interativo Premium Infantil" data-price="95.00">Convite Interativo Premium Infantil - R$ 95,00</option>
+                <option value="Convite Interativo Gold Infantil" data-price="130.00">Convite Interativo Gold Infantil - R$ 130,00</option>
+                <option value="Convite Interativo Gold II Infantil" data-price="199.00">Convite Interativo Gold II Infantil - R$ 199,00</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-botoes-interativos">Botões Interativos</label>
+            <input type="text" id="edit-botoes-interativos" placeholder="Localização, Confirmação, etc." />
+            <small style="color:var(--text-secondary);font-size:0.78rem;">Separe por vírgula</small>
+          </div>
+          <div class="form-group">
+            <label for="edit-complementos">Complementos</label>
+            <input type="text" id="edit-complementos" placeholder="Save the Date, Mascote, etc." />
+            <small style="color:var(--text-secondary);font-size:0.78rem;">Separe por vírgula</small>
+          </div>
+          <div class="form-group">
+            <label for="edit-album-fotos">Álbum de Fotos</label>
+            <select id="edit-album-fotos">
+              <option value="Nenhum">Nenhum</option>
+              <option value="Plano Basic">Plano Basic - R$ 149,00</option>
+              <option value="Plano Pro">Plano Pro - R$ 197,00</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit-forma-pagamento">Forma de Pagamento</label>
+              <select id="edit-forma-pagamento">
+                <option value="Pix">Pix</option>
+                <option value="Cartão">Cartão (+taxas)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit-subtotal">Subtotal (R$)</label>
+              <input type="number" id="edit-subtotal" step="0.01" min="0" placeholder="0.00" />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-editar-pedido')">Cancelar</button>
+        <button class="btn btn-primary" id="btn-salvar-edicao-pedido" onclick="salvarEdicaoPedido()">Salvar Edição</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== HELPER FUNCTIONS (devem carregar ANTES dos módulos) ===== -->
+  <script>
+    /* ===== Modal Helpers ===== */
+    window.openModal = function(id) {
+      var el = document.getElementById(id);
+      if (el) {
+        el.classList.add('show');
+        el.classList.add('active'); // Garante compatibilidade caso o CSS antigo esteja em cache
+      }
+    };
+    window.closeModal = function(id) {
+      var el = document.getElementById(id);
+      if (el) {
+        el.classList.remove('show');
+        el.classList.remove('active');
+      }
+    };
+
+    /* ===== Status Badge Helper ===== */
+    window.getStatusBadge = function(status) {
+      var map = {
+        'Novo': 'badge-info',
+        'Fechado': 'badge-warning',
+        'Em Produção': 'badge-lilac',
+        'Aguardando Aprovação': 'badge-warning',
+        'Aprovado': 'badge-success',
+        'Entregue': 'badge-success-dark',
+        'Cancelado': 'badge-danger'
+      };
+      var cls = map[status] || 'badge-info';
+      return '<span class="badge ' + cls + '">' + (status || 'Novo') + '</span>';
+    };
+
+    /* ===== CPF Input Mask ===== */
+    window.maskCPF = function(input) {
+      var v = input.value.replace(/\D/g, '');
+      if (v.length > 11) v = v.slice(0, 11);
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      input.value = v;
+    };
+  </script>
+
+  <!-- ===== MÓDULOS DE DADOS E LÓGICA ===== -->
+  <script src="js/database.js?v=12"></script>
+  <script src="js/clientes.js?v=9"></script>
+  <script src="js/pedidos.js?v=9"></script>
+  <script src="js/produtos.js?v=2"></script>
+  <script src="js/financeiro.js?v=9"></script>
+  <script src="js/dashboard.js?v=9"></script>
+  <script src="js/auth.js?v=9"></script>
+  <script src="js/pdf-generator.js?v=9"></script>
+  <script src="js/notification.js?v=9"></script>
+
+  <script>
+    /* ===== Navigation ===== */
+    window.showSection = function(sectionId) {
+      document.querySelectorAll('.page-section').forEach(function(s) { s.classList.remove('active'); });
+      var target = document.getElementById('section-' + sectionId);
+      if (target) target.classList.add('active');
+
+      document.querySelectorAll('.sidebar-nav .nav-item').forEach(function(n) { n.classList.remove('active'); });
+      var navItem = document.getElementById('nav-' + sectionId);
+      if (navItem) navItem.classList.add('active');
+
+      switch (sectionId) {
+        case 'dashboard': if (typeof initDashboard === 'function') initDashboard(); break;
+        case 'clientes': if (typeof initClientes === 'function') initClientes(); break;
+        case 'pedidos': if (typeof initPedidos === 'function') initPedidos(); break;
+        case 'financeiro': if (typeof initFinanceiro === 'function') initFinanceiro(); break;
+        case 'produtos': if (typeof initProdutos === 'function') initProdutos(); break;
+      }
+
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.remove('show');
+    };
+
+    /* ===== Sidebar Mobile Toggle ===== */
+    document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebar-overlay').classList.toggle('show');
+    });
+    document.getElementById('sidebar-overlay').addEventListener('click', function() {
+      document.getElementById('sidebar').classList.remove('open');
+      this.classList.remove('show');
+    });
+
+    /* ===== Repostagem Toggle ===== */
+    window.toggleRepostagem = function() {
+      var val = document.getElementById('pedido-precisa-repostar').value;
+      document.getElementById('grupo-data-repostagem').style.display = val === 'true' ? 'block' : 'none';
+    };
+
+    /* ===== Status Change Handler ===== */
+    window.onStatusChange = function() {
+      var status = document.getElementById('pedido-status').value;
+      var grupoSinal = document.getElementById('grupo-sinal');
+      // Mostrar campo de sinal para Fechado e Entregue
+      if (status === 'Fechado' || status === 'Entregue') {
+        grupoSinal.style.display = 'block';
+      } else {
+        grupoSinal.style.display = 'none';
+      }
+      calcularRestante();
+    };
+
+    /* ===== Cálculo Automático do Valor Restante ===== */
+    window.calcularRestante = function() {
+      if (!window._currentPedido) return;
+      // Usa o valor total editado diretamente, se disponível; senão usa o do pedido
+      var inputManual = parseFloat(document.getElementById('pedido-valor-total-edit')?.value);
+      var total = (!isNaN(inputManual) && inputManual >= 0) ? inputManual : (parseFloat(window._currentPedido.valor_total) || 0);
+      var sinal = parseFloat(document.getElementById('pedido-valor-sinal').value) || 0;
+      var restante = total - sinal;
+      if (restante < 0) restante = 0;
+
+      var grupoRestante = document.getElementById('grupo-restante');
+      var inputRestante = document.getElementById('pedido-valor-restante');
+
+      if (sinal >= total && sinal > 0) {
+        // Pagou tudo de uma vez — esconder valor restante
+        grupoRestante.style.display = 'none';
+        inputRestante.value = '0.00';
+      } else {
+        grupoRestante.style.display = 'block';
+        inputRestante.value = restante.toFixed(2);
+      }
+    };
+
+    /* ===== Edição Direta do Valor Total ===== */
+    window.onValorTotalEditado = function() {
+      // Atualiza o display do valor total na coluna esquerda em tempo real
+      var novoTotal = parseFloat(document.getElementById('pedido-valor-total-edit')?.value) || 0;
+      var displayTotal = document.getElementById('pedido-valor-total-info');
+      if (displayTotal) {
+        displayTotal.textContent = novoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      }
+      // Recalcula o valor restante com base no novo total
+      calcularRestante();
+    };
+
+    /* ===== Cadastro Rápido de Cliente (dentro do modal de pedido) ===== */
+    window.openModalClienteRapido = function() {
+      // Abre o modal de cliente normal, mas marca que veio do pedido
+      window._fromPedidoModal = true;
+      if (typeof openModalCliente === 'function') {
+        openModalCliente();
+      } else {
+        document.getElementById('modal-cliente-title').textContent = 'Nova Cliente';
+        document.getElementById('input-cliente-nome').value = '';
+        document.getElementById('input-cliente-cpf').value = '';
+        var telInput = document.getElementById('input-cliente-telefone');
+        if (telInput) telInput.value = '';
+        openModal('modal-cliente');
+      }
+    };
+
+    /* ===== Exibe telefone ao selecionar cliente no modal de pedido ===== */
+    window.onClienteChangePedido = function(select) {
+      var opt = select.options[select.selectedIndex];
+      var display = document.getElementById('pedido-telefone-display');
+      var valorEl = document.getElementById('pedido-telefone-valor');
+      if (!display || !valorEl) return;
+
+      if (!opt || !opt.value) {
+        display.style.display = 'none';
+        return;
+      }
+
+      // O telefone é armazenado no data-telefone do option (populado pelo openModalPedido)
+      var tel = opt.dataset.telefone || '';
+      if (tel) {
+        valorEl.textContent = tel;
+        display.style.display = 'block';
+      } else {
+        display.style.display = 'none';
+      }
+    };
+
+    /* ===== Populate Financeiro Month/Year Selects ===== */
+    (function populateFinanceiroFilters() {
+      var meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+      var selMes = document.getElementById('financeiro-mes');
+      var selAno = document.getElementById('financeiro-ano');
+      var now = new Date();
+      meses.forEach(function(m, i) {
+        var opt = document.createElement('option');
+        opt.value = i + 1;
+        opt.textContent = m;
+        if (i === now.getMonth()) opt.selected = true;
+        selMes.appendChild(opt);
+      });
+      for (var y = 2024; y <= 2030; y++) {
+        var opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = y;
+        if (y === now.getFullYear()) opt.selected = true;
+        selAno.appendChild(opt);
+      }
+    })();
+
+    /* ===== Init App ===== */
+    // Os scripts já estão carregados (são síncronos), então inicializamos direto
+    if (typeof initDashboard === 'function') {
+      initDashboard();
+    }
+    // Iniciar polling de notificações
+    if (typeof startNotificationPolling === 'function') {
+      startNotificationPolling();
+    }
+  </script>
+
+  <!-- ===== PWA: Service Worker + Instalação ===== -->
+  <script>
+    /* Registrar Service Worker */
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').then(function (reg) {
+        console.log('[PWA] Service Worker registrado:', reg.scope);
+      }).catch(function (err) {
+        console.warn('[PWA] Falha ao registrar SW:', err);
+      });
+    }
+
+    /* Prompt de instalação como app */
+    let _deferredInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      _deferredInstallPrompt = e;
+      // Mostrar botão de instalar na sidebar se ainda não instalado
+      var btn = document.getElementById('btn-instalar-app');
+      if (btn) btn.style.display = 'flex';
+    });
+    window.addEventListener('appinstalled', function () {
+      var btn = document.getElementById('btn-instalar-app');
+      if (btn) btn.style.display = 'none';
+      showToast('App instalado com sucesso! 🎉');
+    });
+    window.instalarApp = function () {
+      if (_deferredInstallPrompt) {
+        _deferredInstallPrompt.prompt();
+        _deferredInstallPrompt.userChoice.then(function (result) {
+          if (result.outcome === 'accepted') {
+            showToast('Instalando o app...');
+          }
+          _deferredInstallPrompt = null;
+        });
+      }
+    };
+  </script>
+</body>
+</html>

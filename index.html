@@ -6,20 +6,32 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
     />
-    <title>Raíz & Pixel Convites — Formalização de Pedido</title>
+    <title>Raíz & Pixel Convites - Formalização de Pedido</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link href="img/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+    <link
+      href="img/favicon-32x32.png"
+      rel="icon"
+      sizes="32x32"
+      type="image/png"
+    />
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
-      onerror="this.dataset.failed='1'; var s=document.createElement('script'); s.src='https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js'; s.onerror=function(){window.__jspdfFatal=true;}; document.head.appendChild(s);"
+      onerror="
+        this.dataset.failed = '1';
+        var s = document.createElement('script');
+        s.src = 'https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js';
+        s.onerror = function () {
+          window.__jspdfFatal = true;
+        };
+        document.head.appendChild(s);
+      "
     ></script>
     <style>
       :root {
-        /* ====== PALETA — altere aqui para customizar todo o site ====== */
         --color-lilac: #f3d9ff;
         --color-lilac-deep: #c9a0e0;
         --color-gold: #d4af6a;
@@ -29,7 +41,6 @@
         --color-ink-soft: #6b5470;
         --color-success: #4caf6b;
         --color-danger: #c0506b;
-
         --bg-gradient: linear-gradient(
           160deg,
           var(--color-lilac) 0%,
@@ -40,15 +51,12 @@
         --card-radius: 22px;
         --shadow-soft: 0 10px 30px rgba(107, 50, 92, 0.18);
         --shadow-lift: 0 16px 40px rgba(107, 50, 92, 0.26);
-
         --font-display: "Cinzel", serif;
         --font-body: "Inter", sans-serif;
       }
-
       * {
         box-sizing: border-box;
       }
-
       html,
       body {
         margin: 0;
@@ -59,28 +67,18 @@
         background-attachment: fixed;
         min-height: 100vh;
       }
-
       body {
         display: flex;
         justify-content: center;
         padding: 24px 14px 60px;
       }
-
       .page {
         width: 100%;
         max-width: 480px;
       }
-
-      /* ====== HEADER / LOGO ====== */
       .brand {
         text-align: center;
         margin-bottom: 22px;
-      }
-      .brand img {
-        width: 120px;
-        height: 120px;
-        object-fit: contain;
-        filter: drop-shadow(0 6px 14px rgba(107, 50, 92, 0.25));
       }
       .brand h1 {
         font-family: var(--font-display);
@@ -97,8 +95,6 @@
         color: var(--color-gold-deep);
         font-weight: 600;
       }
-
-      /* ====== CARDS ====== */
       .card {
         background: var(--card-bg);
         backdrop-filter: blur(6px);
@@ -108,7 +104,6 @@
         margin-bottom: 18px;
         border: 1px solid rgba(212, 175, 106, 0.25);
       }
-
       .card h2 {
         font-family: var(--font-display);
         font-size: 1.05rem;
@@ -133,7 +128,6 @@
         align-items: center;
         justify-content: center;
       }
-
       .field {
         margin-bottom: 14px;
       }
@@ -151,7 +145,6 @@
         color: #9b86a3;
         margin-top: 3px;
       }
-
       input[type="text"],
       input[type="date"],
       input[type="time"],
@@ -178,25 +171,20 @@
         border-color: var(--color-gold-deep);
         box-shadow: 0 0 0 3px rgba(212, 175, 106, 0.25);
       }
-
       select {
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' stroke='%236b5470' stroke-width='2' fill='none' fill-rule='evenodd'/></svg>");
         background-repeat: no-repeat;
         background-position: right 14px center;
         padding-right: 36px;
       }
-
       optgroup {
         font-weight: 700;
-        font-style: normal;
         color: var(--color-gold-deep);
       }
       option {
         font-weight: 400;
         color: var(--color-ink);
       }
-
-      /* ====== CHECKBOXES ====== */
       .checklist {
         display: flex;
         flex-direction: column;
@@ -245,7 +233,6 @@
         opacity: 0.4;
         pointer-events: none;
       }
-
       .hint-bar {
         font-size: 0.76rem;
         color: var(--color-ink-soft);
@@ -257,8 +244,6 @@
         font-weight: 700;
         color: var(--color-gold-deep);
       }
-
-      /* ====== RADIO PILLS (pagamento) ====== */
       .pill-group {
         display: flex;
         gap: 10px;
@@ -292,8 +277,6 @@
         border-color: var(--color-gold-deep);
         box-shadow: var(--shadow-soft);
       }
-
-      /* ====== TOTAL ====== */
       .total-box {
         background: linear-gradient(135deg, var(--color-ink) 0%, #56335f 100%);
         color: var(--color-white);
@@ -317,8 +300,6 @@
         margin-top: 6px;
         color: var(--color-gold);
       }
-
-      /* ====== TERMOS ====== */
       .terms-box {
         max-height: 220px;
         overflow-y: auto;
@@ -337,7 +318,6 @@
       .terms-box p:last-child {
         margin-bottom: 0;
       }
-
       .agree-item {
         display: flex;
         align-items: flex-start;
@@ -352,8 +332,6 @@
         accent-color: var(--color-gold-deep);
         flex-shrink: 0;
       }
-
-      /* ====== BOTÃO PRINCIPAL ====== */
       .btn-main {
         width: 100%;
         padding: 16px;
@@ -387,7 +365,6 @@
         box-shadow: none;
         margin-top: 10px;
       }
-
       .error-msg {
         color: var(--color-danger);
         font-size: 0.78rem;
@@ -396,8 +373,6 @@
         margin-top: 10px;
         display: none;
       }
-
-      /* ====== MODAL ====== */
       .modal-overlay {
         position: fixed;
         inset: 0;
@@ -420,6 +395,8 @@
         width: 100%;
         box-shadow: var(--shadow-lift);
         text-align: center;
+        max-height: 90vh;
+        overflow-y: auto;
       }
       .modal h3 {
         font-family: var(--font-display);
@@ -472,7 +449,6 @@
         display: block;
         font-size: 0.85rem;
       }
-
       .modal-icon {
         width: 54px;
         height: 54px;
@@ -488,7 +464,6 @@
         margin: 0 auto 10px;
         font-size: 1.5rem;
       }
-
       ::-webkit-scrollbar {
         width: 6px;
       }
@@ -501,13 +476,10 @@
   <body>
     <div class="page">
       <div class="brand">
-      
         <h1>Raíz &amp; Pixel</h1>
         <p>Formalização de Pedido</p>
       </div>
-
       <form id="orderForm">
-        <!-- ===== DADOS DO CONTRATANTE ===== -->
         <div class="card">
           <h2><span class="step-num">1</span> Dados do Contratante</h2>
           <div class="field">
@@ -529,9 +501,16 @@
               maxlength="14"
             />
           </div>
+          <div class="field">
+            <label for="telefoneContratante">Telefone / WhatsApp *</label>
+            <input
+              type="text"
+              id="telefoneContratante"
+              required
+              placeholder="(21) 99999-9999"
+            />
+          </div>
         </div>
-
-        <!-- ===== DETALHES DO EVENTO ===== -->
         <div class="card">
           <h2><span class="step-num">2</span> Detalhes do Evento</h2>
           <div class="field">
@@ -542,7 +521,7 @@
               type="text"
               id="nomeAniversariante"
               required
-              placeholder="Ex: Helena — 1 aninho"
+              placeholder="Ex: Helena - 1 aninho"
             />
           </div>
           <div class="field">
@@ -554,17 +533,6 @@
             <input type="time" id="horaEvento" required />
           </div>
           <div class="field">
-            <label for="localEvento"
-              >Local da festa (endereço completo) *</label
-            >
-            <textarea
-              id="localEvento"
-              rows="2"
-              required
-              placeholder="Rua, número, bairro, cidade, ponto de referência"
-            ></textarea>
-          </div>
-          <div class="field">
             <label for="temaFesta">Tema da festa *</label>
             <input
               type="text"
@@ -574,48 +542,12 @@
             />
           </div>
           <div class="field">
-            <label for="trilhaSonora">Trilha sonora (nome da música)</label>
+            <label for="trilhaSonora">Trilha sonora (nome ou link da música)</label>
             <input
               type="text"
               id="trilhaSonora"
-              placeholder="Ex: Perfect — Ed Sheeran"
+              placeholder="Ex: Perfect - Ed Sheeran ou cole o link"
             />
-          </div>
-          <div class="field">
-            <label for="dressCode">Dress code — traje da festa</label>
-            <input type="text" id="dressCode" placeholder="Opcional" />
-          </div>
-          <div class="field">
-            <label for="paletaCores">Paleta de cores escolhida</label>
-            <input
-              type="text"
-              id="paletaCores"
-              placeholder="Opcional — ex: lilás e dourado"
-            />
-          </div>
-          <div class="field">
-            <label for="confirmacaoPresenca"
-              >Confirmação de presença será via *</label
-            >
-            <select id="confirmacaoPresenca" required>
-              <option value="">Selecione...</option>
-              <option value="WhatsApp">WhatsApp</option>
-              <option value="Formulário">Formulário</option>
-            </select>
-          </div>
-          <div class="field" id="whatsappConfirmacaoWrap" style="display: none">
-            <label for="whatsappConfirmacao"
-              >Número de WhatsApp para confirmação *</label
-            >
-            <input
-              type="text"
-              id="whatsappConfirmacao"
-              placeholder="(21) 90000-0000"
-            />
-            <small
-              >Os convidados vão confirmar presença enviando mensagem para
-              este número.</small
-            >
           </div>
           <div class="field">
             <label for="observacoes">Observações gerais</label>
@@ -626,8 +558,6 @@
             ></textarea>
           </div>
         </div>
-
-        <!-- ===== MODELO ===== -->
         <div class="card">
           <h2><span class="step-num">3</span> Escolha seu Modelo</h2>
           <div class="field">
@@ -636,105 +566,73 @@
               <option value="" data-price="0">Selecione um modelo...</option>
               <optgroup label="Coleção 15 Anos/Casamento/Festas em Geral">
                 <option value="Convite Interativo Luxo" data-price="79.99">
-                  Convite Interativo Luxo — R$ 79,99
+                  Convite Interativo Luxo - R$ 79,99
                 </option>
                 <option value="Convite Interativo Premium" data-price="95.00">
-                  Convite Interativo Premium — R$ 95,00
+                  Convite Interativo Premium - R$ 95,00
                 </option>
                 <option value="Convite Interativo Gold" data-price="130.00">
-                  Convite Interativo Gold — R$ 130,00
+                  Convite Interativo Gold - R$ 130,00
                 </option>
                 <option value="Convite Interativo Gold II" data-price="160.00">
-                  Convite Interativo Gold II — R$ 160,00
+                  Convite Interativo Gold II - R$ 160,00
                 </option>
                 <option value="Convite Interativo Infinito" data-price="99.00">
-                  Convite Interativo Infinito — R$ 99,00
+                  Convite Interativo Infinito - R$ 99,00
                 </option>
                 <option
                   value="Convite Interativo Especial Plus"
                   data-price="110.00"
                 >
-                  Convite Interativo Especial Plus — R$ 110,00
+                  Convite Interativo Especial Plus - R$ 110,00
                 </option>
               </optgroup>
               <optgroup label="Coleção Infantil">
                 <option value="Convite Tradicional" data-price="24.99">
-                  Convite Tradicional — R$ 24,99
+                  Convite Tradicional - R$ 24,99
                 </option>
-                <option
-                  value="Convite Interativo Simples"
-                  data-price="35.00"
-                >
-                  Convite Interativo Simples — R$ 35,00
+                <option value="Convite Interativo Simples" data-price="35.00">
+                  Convite Interativo Simples - R$ 35,00
                 </option>
-                <option
-                  value="Convite Interativo Musical"
-                  data-price="40.00"
-                >
-                  Convite Interativo Musical — R$ 40,00
+                <option value="Convite Interativo Musical" data-price="40.00">
+                  Convite Interativo Musical - R$ 40,00
                 </option>
-                <option
-                  value="Convite Interativo Plus"
-                  data-price="45.00"
-                >
-                  Convite Interativo Plus — R$ 45,00
+                <option value="Convite Interativo Plus" data-price="45.00">
+                  Convite Interativo Plus - R$ 45,00
                 </option>
-                <option
-                  value="Convite Interativo Especial"
-                  data-price="60.00"
-                >
-                  Convite Interativo Especial — R$ 60,00
+                <option value="Convite Interativo Especial" data-price="60.00">
+                  Convite Interativo Especial - R$ 60,00
                 </option>
                 <option
                   value="Convite Interativo Luxo Infantil"
                   data-price="80.00"
                 >
-                  Convite Interativo Luxo Infantil — R$ 80,00
+                  Convite Interativo Luxo Infantil - R$ 80,00
                 </option>
                 <option
                   value="Convite Interativo Premium Infantil"
                   data-price="95.00"
                 >
-                  Convite Interativo Premium Infantil — R$ 95,00
+                  Convite Interativo Premium Infantil - R$ 95,00
                 </option>
                 <option
                   value="Convite Interativo Gold Infantil"
                   data-price="130.00"
                 >
-                  Convite Interativo Gold Infantil — R$ 130,00
+                  Convite Interativo Gold Infantil - R$ 130,00
                 </option>
                 <option
                   value="Convite Interativo Gold II Infantil"
                   data-price="199.00"
                 >
-                  Convite Interativo Gold II Infantil — R$ 199,00
+                  Convite Interativo Gold II Infantil - R$ 199,00
                 </option>
               </optgroup>
             </select>
           </div>
         </div>
-
-        <!-- ===== SERVIÇOS EXTRAS (placeholders) ===== -->
         <div class="card">
-          <h2><span class="step-num">4</span> Serviços Extras</h2>
-          <!--
-        ESPAÇO RESERVADO: substitua os itens abaixo pelos seus próprios serviços extras.
-        Basta editar o texto dentro de <b> e o atributo data-price de cada input.
-      -->
-          <!-- <div class="checklist" id="extrasList">
-            <label class="check-item">
-              <input type="checkbox" class="extra-checkbox" data-price="50.00" />
-              <span class="check-label"
-                ><b>Taxa de Urgência (24h) </b
-                ><span class="price">R$ 50,00</span></span
-              >
-            </label>
-          </div>
-        </div> -->
-
-        <!-- ===== BOTÕES INTERATIVOS ===== -->
-        <div class="card">
-          <h2><span class="step-num">5</span> Botões Interativos</h2>
+          <h2><span class="step-num">4</span> Botões Interativos</h2>
           <p
             style="
               font-size: 0.82rem;
@@ -749,22 +647,81 @@
             <span><span id="btnCount">0</span>/5 selecionados</span>
           </div>
           <div class="checklist" id="botoesList">
+            <!-- Localização -->
             <label class="check-item"
               ><input
                 type="checkbox"
                 class="botao-checkbox"
                 value="Localizacao"
+                id="localizacaoCheck"
               /><span class="check-label"><b>Localização</b></span></label
             >
+            <div
+              class="field"
+              id="localizacaoWrap"
+              style="display: none; margin-top: 0; margin-bottom: 6px"
+            >
+              <label for="localEvento">Endereço ou link de localização *</label>
+              <textarea
+                id="localEvento"
+                rows="2"
+                placeholder="Ex: Rua das Flores, 123 - Bairro, Cidade ou cole o link do Google Maps"
+              ></textarea>
+            </div>
+
+            <!-- Confirmação de presença -->
             <label class="check-item"
               ><input
                 type="checkbox"
                 class="botao-checkbox"
                 value="Confirmação de presença"
+                id="confirmacaoCheck"
               /><span class="check-label"
                 ><b>Confirmação de presença</b></span
               ></label
             >
+            <div
+              class="field"
+              id="confirmacaoPresencaWrap"
+              style="display: none; margin-top: 0; margin-bottom: 4px"
+            >
+              <label for="confirmacaoPresenca"
+                >Confirmação de presença será via *</label
+              >
+              <select id="confirmacaoPresenca">
+                <option value="" data-price="0">Selecione...</option>
+                <option value="WhatsApp" data-price="0">WhatsApp (sem custo adicional)</option>
+                <option value="Formulário Simples" data-price="29.99">Formulário simples com acesso à planilha - R$ 29,99</option>
+                <option value="Formulário com QR Code" data-price="59.99">Formulário com QR Code - R$ 59,99</option>
+              </select>
+            </div>
+            <div class="field" id="whatsappConfirmacaoWrap" style="display: none; margin-top: 0; margin-bottom: 4px">
+              <label for="whatsappConfirmacao"
+                >Número de WhatsApp para confirmação *</label
+              >
+              <input
+                type="text"
+                id="whatsappConfirmacao"
+                placeholder="(21) 90000-0000"
+              />
+              <small
+                >Os convidados vão confirmar presença enviando mensagem para este
+                número.</small
+              >
+            </div>
+            <div class="field" id="mensagemConfirmacaoWrap" style="display: none; margin-top: 0; margin-bottom: 6px">
+              <label for="mensagemConfirmacao"
+                >Mensagem de confirmação para o WhatsApp *</label
+              >
+              <textarea
+                id="mensagemConfirmacao"
+                rows="3"
+                placeholder="Ex: Olá! Confirme sua presença na festa da Helena respondendo SIM ou NÃO. Obrigada!"
+              ></textarea>
+              <small>Esta mensagem será enviada aos convidados para confirmação de presença.</small>
+            </div>
+
+            <!-- Sugestão de presentes -->
             <label class="check-item"
               ><input
                 type="checkbox"
@@ -775,21 +732,82 @@
                 ><b>Sugestão de presentes</b></span
               ></label
             >
-            <label class="check-item"
-              ><input
-                type="checkbox"
-                class="botao-checkbox"
-                value="Chave Pix"
-                id="chavePixCheck"
-              /><span class="check-label"><b>Chave Pix</b></span></label
+            <div
+              class="field"
+              id="sugestoesPresenteWrap"
+              style="display: none; margin-top: 0; margin-bottom: 6px"
             >
+              <label for="sugestoesPresente">Sugestões de presente ou link da lista</label>
+              <textarea
+                id="sugestoesPresente"
+                rows="3"
+                placeholder="Ex: Fraldas, roupinhas tamanho RN, brinquedos educativos... ou cole o link da lista de presentes"
+              ></textarea>
+              <div style="margin-top: 10px">
+                <label for="chavePixValor">Chave Pix (opcional)</label>
+                <input
+                  type="text"
+                  id="chavePixValor"
+                  placeholder="Ex: CPF, e-mail, telefone ou chave aleatória"
+                />
+                <small>Caso deseje incluir uma chave Pix para presentes.</small>
+              </div>
+            </div>
+
+            <!-- Dress code -->
             <label class="check-item"
               ><input
                 type="checkbox"
                 class="botao-checkbox"
                 value="Dress code"
+                id="dressCodeCheck"
               /><span class="check-label"><b>Dress code</b></span></label
             >
+            <div
+              class="field"
+              id="dressCodeWrap"
+              style="display: none; margin-top: 0; margin-bottom: 6px"
+            >
+              <label for="dressCode">Tipo de dress code / traje</label>
+              <input
+                type="text"
+                id="dressCode"
+                placeholder="Ex: Esporte fino, Casual chique, Branco e dourado..."
+              />
+              <div style="margin-top: 10px">
+                <label for="paletaCores">Paleta de cores</label>
+                <input
+                  type="text"
+                  id="paletaCores"
+                  placeholder="Ex: Lilás e dourado, Rosa e branco..."
+                />
+              </div>
+            </div>
+
+            <!-- Manual do Convidado -->
+            <label class="check-item"
+              ><input
+                type="checkbox"
+                class="botao-checkbox"
+                value="Manual do Convidado"
+                id="manualConvidadoCheck"
+              /><span class="check-label"><b>Manual do Convidado</b></span></label
+            >
+            <div
+              class="field"
+              id="manualConvidadoWrap"
+              style="display: none; margin-top: 0; margin-bottom: 6px"
+            >
+              <label for="manualConvidadoValor">Informações do Manual do Convidado</label>
+              <textarea
+                id="manualConvidadoValor"
+                rows="4"
+                placeholder="Ex: Horário da festa, regras do espaço, informações sobre estacionamento, orientações sobre trajes, alergias alimentares, etc."
+              ></textarea>
+              <small>Descreva todas as informações que deseja incluir no manual do convidado.</small>
+            </div>
+
+            <!-- Outros -->
             <label class="check-item"
               ><input
                 type="checkbox"
@@ -798,46 +816,44 @@
                 id="outrosCheck"
               /><span class="check-label"><b>Outros</b></span></label
             >
-          </div>
-          <div
-            class="field"
-            id="sugestoesPresenteWrap"
-            style="display: none; margin-top: 12px"
-          >
-            <label for="sugestoesPresente">Sugestões de presente</label>
-            <textarea
-              id="sugestoesPresente"
-              rows="3"
-              placeholder="Ex: Fraldas, roupinhas tamanho RN, brinquedos educativos..."
-            ></textarea>
-          </div>
-          <div
-            class="field"
-            id="chavePixWrap"
-            style="display: none; margin-top: 12px"
-          >
-            <label for="chavePixValor">Chave Pix</label>
-            <input
-              type="text"
-              id="chavePixValor"
-              placeholder="Ex: CPF, e-mail, telefone ou chave aleatória"
-            />
-          </div>
-          <div
-            class="field"
-            id="outrosWrap"
-            style="display: none; margin-top: 12px"
-          >
-            <label for="outrosValor">O que você deseja?</label>
-            <textarea
-              id="outrosValor"
-              rows="3"
-              placeholder="Descreva aqui o botão/informação personalizada desejada"
-            ></textarea>
+            <div
+              class="field"
+              id="outrosWrap"
+              style="display: none; margin-top: 0; margin-bottom: 6px"
+            >
+              <label for="outrosValor">O que você deseja?</label>
+              <textarea
+                id="outrosValor"
+                rows="3"
+                placeholder="Descreva aqui o botão/informação personalizada desejada"
+              ></textarea>
+            </div>
           </div>
         </div>
-
-        <!-- ===== COMPLEMENTOS ===== -->
+        <!-- Cores do Convite -->
+        <div class="card">
+          <h2>
+            <span class="step-num">5</span> Cores do Convite
+            <span
+              style="
+                font-family: var(--font-body);
+                font-weight: 400;
+                font-size: 0.7rem;
+                color: var(--color-ink-soft);
+              "
+              >(opcional)</span
+            >
+          </h2>
+          <div class="field">
+            <label for="coresConvite">Especifique as cores desejadas para o convite</label>
+            <input
+              type="text"
+              id="coresConvite"
+              placeholder="Ex: Rosa claro, dourado e branco"
+            />
+            <small>Informe as cores que deseja no visual do seu convite.</small>
+          </div>
+        </div>
         <div class="card">
           <h2>
             <span class="step-num">6</span> Complementos
@@ -852,16 +868,6 @@
             >
           </h2>
           <div class="checklist" id="complementosList">
-            <label class="check-item"
-              ><input
-                type="checkbox"
-                class="comp-checkbox"
-                data-price="39.90"
-              /><span class="check-label"
-                ><b>Formulário de confirmação de presença</b
-                ><span class="price">R$ 39,90</span></span
-              ></label
-            >
             <label class="check-item"
               ><input
                 type="checkbox"
@@ -906,10 +912,10 @@
               ><input
                 type="checkbox"
                 class="comp-checkbox"
-                data-price="49.90"
+                data-price="39.99"
               /><span class="check-label"
-                ><b>Filtro + Placa QrCode para Instagram</b
-                ><span class="price">R$ 49,90</span></span
+                ><b>Filtro + Placa QrCode</b
+                ><span class="price">R$ 39,99</span></span
               ></label
             >
             <label class="check-item"
@@ -926,33 +932,132 @@
               ><input
                 type="checkbox"
                 class="comp-checkbox"
-                data-price="50.00"
+                data-price="10.00"
+                id="fotoModeloCheck"
               /><span class="check-label"
-                ><b>Taxa de urgência / Priorização na agenda</b
+                ><b>Adicionar foto no modelo do convite</b
+                ><span class="price">R$ 10,00 por foto</span></span
+              ></label
+            >
+            <label class="check-item"
+              ><input
+                type="checkbox"
+                class="comp-checkbox"
+                data-price="30.00"
+                id="urgenciaCheck"
+              /><span class="check-label"
+                ><b>Taxa de urgência 24h</b
                 ><span class="price"
-                  >R$ 50,00 — mediante disponibilidade verificada</span
+                  >A partir de R$ 30,00 - mediante disponibilidade verificada</span
                 ></span
               ></label
             >
           </div>
+          <div
+            class="field"
+            id="qtdFotosWrap"
+            style="display: none; margin-top: 12px"
+          >
+            <label for="qtdFotos">Quantas fotos deseja adicionar? *</label>
+            <select id="qtdFotos">
+              <option value="1">1 foto - R$ 10,00</option>
+              <option value="2">2 fotos - R$ 20,00</option>
+              <option value="3">3 fotos - R$ 30,00</option>
+              <option value="4">4 fotos - R$ 40,00</option>
+              <option value="5">5 fotos - R$ 50,00</option>
+            </select>
+          </div>
         </div>
-
-        <!-- ===== PAGAMENTO ===== -->
+        <!-- Álbum de Fotos -->
         <div class="card">
-          <h2><span class="step-num">7</span> Forma de Pagamento</h2>
+          <h2>
+            <span class="step-num">7</span> Álbum de Fotos
+            <span
+              style="
+                font-family: var(--font-body);
+                font-weight: 400;
+                font-size: 0.7rem;
+                color: var(--color-ink-soft);
+              "
+              >(opcional)</span
+            >
+          </h2>
+          <p
+            style="
+              font-size: 0.82rem;
+              color: var(--color-ink-soft);
+              margin-top: -8px;
+              margin-bottom: 14px;
+            "
+          >
+            Escolha o plano ideal para registrar os melhores momentos da festa.
+          </p>
+          <div class="checklist" id="albumList">
+            <label class="check-item">
+              <input
+                type="radio"
+                name="albumFotos"
+                class="album-radio"
+                value="Nenhum"
+                data-price="0"
+                checked
+              />
+              <span class="check-label">
+                <b>Não desejo álbum de fotos</b>
+              </span>
+            </label>
+            <label class="check-item">
+              <input
+                type="radio"
+                name="albumFotos"
+                class="album-radio"
+                value="Plano Basic"
+                data-price="149.00"
+              />
+              <span class="check-label">
+                <b>📸 Plano Basic - R$ 149,00</b>
+                <span style="font-size: 0.78rem; color: var(--color-ink-soft); margin-top: 4px; line-height: 1.5;">
+                  • Até 500 fotos no total<br/>
+                  • 10 vídeos<br/>
+                  • 10 storys<br/>
+                  • Armazenamento por 5 dias após a festa<br/>
+                  • Inclui arte da plaquinha QR Code
+                </span>
+                <span class="price">R$ 149,00</span>
+              </span>
+            </label>
+            <label class="check-item">
+              <input
+                type="radio"
+                name="albumFotos"
+                class="album-radio"
+                value="Plano Pro"
+                data-price="197.00"
+              />
+              <span class="check-label">
+                <b>🌟 Plano Pro - R$ 197,00</b>
+                <span style="font-size: 0.78rem; color: var(--color-ink-soft); margin-top: 4px; line-height: 1.5;">
+                  • Fotos, vídeos e storys ilimitados<br/>
+                  • Armazenamento por até 10 dias após a festa<br/>
+                  • Inclui arte da plaquinha QR Code
+                </span>
+                <span class="price">R$ 197,00</span>
+              </span>
+            </label>
+          </div>
+        </div>
+        <div class="card">
+          <h2><span class="step-num">8</span> Forma de Pagamento</h2>
           <div class="pill-group">
             <label class="pill"
-              ><input type="radio" name="pagamento" value="Pix" />
-              Pix</label
+              ><input type="radio" name="pagamento" value="Pix" /> Pix</label
             >
             <label class="pill"
-              ><input type="radio" name="pagamento" value="Cartão" />
-              Cartão (+taxas)</label
+              ><input type="radio" name="pagamento" value="Cartão" /> Cartão
+              (+taxas)</label
             >
           </div>
         </div>
-
-        <!-- ===== TOTAL ===== -->
         <div class="total-box">
           <p>Investimento Total</p>
           <div class="value" id="totalValue">R$ 0,00</div>
@@ -966,18 +1071,13 @@
             "
           ></div>
         </div>
-
-        <!-- ===== TERMOS ===== -->
         <div class="card">
-          <h2><span class="step-num">8</span> Termos de Contratação</h2>
+          <h2><span class="step-num">9</span> Termos de Contratação</h2>
           <div class="terms-box" id="termsBox">
             <p><b>Leia com atenção:</b></p>
             <p>
               1. Após o início da confecção do convite, será enviado aviso ao
-              cliente e não será realizado qualquer tipo de reembolso,
-              independentemente do valor já pago, considerando que as
-              plataformas, ferramentas e créditos utilizados no processo possuem
-              custo operacional e não são passíveis de reversão.
+              cliente e não será realizado qualquer tipo de reembolso...
             </p>
             <p>
               2. O pedido será considerado formalizado após o preenchimento
@@ -990,61 +1090,43 @@
             </p>
             <p>
               4. É de responsabilidade do contratante enviar corretamente todos
-              os dados necessários para a produção do material, tais como nomes,
-              datas, horários, links, frases, referências e demais informações
-              solicitadas.
+              os dados necessários para a produção do material...
             </p>
             <p>
               5. O prazo de produção e entrega será informado conforme a demanda
-              e a data do evento, passando a contar após a confirmação do pedido
-              e o envio de todas as informações necessárias para a execução do
-              serviço.
+              e a data do evento...
             </p>
             <p>
               6. O valor contratado contempla até 2 (duas) alterações no
-              material solicitado, sem acréscimo. Caso haja necessidade de novas
-              modificações após esse limite, será aplicada uma taxa adicional de
-              R$ 20,00 (cinquenta reais) por alteração.
+              material solicitado, sem acréscimo...
             </p>
             <p>
               7. Após a aprovação final do material pelo contratante, não será
               possível responsabilizar a contratada por erros previamente
-              aprovados, incluindo, mas não se limitando a, nomes, datas,
-              horários, links, textos e demais informações constantes no
-              material.
+              aprovados...
             </p>
             <p>
               8. Todos os convites produzidos pela empresa poderão ser
-              utilizados para divulgação da marca em redes sociais, portfólio ou
-              outras plataformas, sem necessidade de autorização adicional do
-              cliente, desde que dados sensíveis sejam preservados ou ocultados
-              quando necessário.
+              utilizados para divulgação da marca em redes sociais...
             </p>
             <p>
               9. O convite permanecerá disponível para acesso pelo prazo de até
-              60 (sessenta) dias após a data do evento. Após esse período, a
-              manutenção, reativação ou nova disponibilização poderá estar
-              sujeita à cobrança adicional, conforme análise da contratada.
+              60 (sessenta) dias após a data do evento...
             </p>
             <p>
               10. Alguns aparelhos telefônicos, em razão de limitações técnicas,
               ausência de atualização do sistema operacional ou excesso de
               abas/guias abertas no navegador, poderão apresentar dificuldades
-              para leitura do convite, incluindo lentidão no carregamento,
-              travamentos ou falhas na reprodução de trilha sonora e demais
-              recursos interativos. A velocidade da internet também pode
-              interferir por se tratar de um produto publicado na web.
+              para leitura do convite...
             </p>
             <p>
               11. O cliente declara ciência de que o convite contratado consiste
               em produto digital e depende diretamente de conexão com a internet
-              para seu funcionamento e visualização adequados por parte dos
-              convidados.
+              para seu funcionamento e visualização adequados...
             </p>
             <p>
               12. Os materiais serão entregues em formato digital, conforme a
-              proposta contratada, não estando inclusos serviços de impressão,
-              produção física ou quaisquer itens não especificados previamente.
+              proposta contratada, não estando inclusos serviços de impressão...
             </p>
             <p>
               13. Pedidos com prazo reduzido, urgência ou necessidade de
@@ -1053,21 +1135,11 @@
             </p>
             <p>
               14. Cada modelo de convite possui prazo de produção próprio,
-              estipulado em dias úteis (de segunda a sexta-feira), podendo
-              variar de acordo com a complexidade do projeto contratado.
+              estipulado em dias úteis...
             </p>
             <p>
               15. O mascote personalizado é criado de forma artística e autoral,
-              com o auxílio de ferramentas de Inteligência Artificial,
-              combinadas com direção criativa humana, inspirado nas
-              características da pessoa/criança indicada, tais como: traços
-              físicos gerais, estilo visual, elementos temáticos escolhidos.
-              Importante: o resultado não se trata de uma caricatura fiel ou
-              retrato realista, mas sim de uma interpretação artística
-              estilizada. Dessa forma, o resultado final pode conter variações
-              em relação às imagens de referência; pequenas diferenças são
-              naturais do processo criativo digital. Não há garantia de
-              reprodução exata de feições reais.
+              com o auxílio de ferramentas de Inteligência Artificial...
             </p>
             <p>
               16. Todas as imagens, artes e elementos visuais desenvolvidos para
@@ -1093,7 +1165,6 @@
             Li e concordo com todos os termos acima
           </label>
         </div>
-
         <button type="submit" class="btn-main" id="generateBtn">
           Gerar Contrato
         </button>
@@ -1102,17 +1173,16 @@
         </p>
       </form>
     </div>
-
-    <!-- ===== MODAL ===== -->
     <div class="modal-overlay" id="modalOverlay">
       <div class="modal">
-        <div class="modal-icon">📄</div>
+        <div class="modal-icon">🎉</div>
         <h3>Quase lá!</h3>
         <p>
-          Siga os dois passos abaixo para finalizar a formalização do seu
-          pedido.
+          Siga os passos abaixo para finalizar a formalização do seu pedido.
         </p>
-
+        <div id="sheetStatus" style="display:none; align-items:center; gap:8px; background:#eef8f0; border:1.5px solid rgba(76,175,107,0.4); border-radius:12px; padding:10px 14px; margin-bottom:12px; font-size:0.8rem; color:#2f7a4e; font-weight:600;">
+          <span style="font-size:1.1rem;">✅</span> Dados enviados para a planilha!
+        </div>
         <div class="modal-step" id="stepDownload">
           <div class="num">1</div>
           <div class="txt">
@@ -1123,7 +1193,6 @@
         <button type="button" class="btn-main" id="btnDownloadPdf">
           Baixar PDF
         </button>
-
         <div class="modal-step" id="stepWhats" style="margin-top: 16px">
           <div class="num">2</div>
           <div class="txt">
@@ -1140,54 +1209,70 @@
         >
           Enviar via WhatsApp
         </button>
-
+        <div class="modal-step" id="stepFallback" style="margin-top:12px; display:none;">
+          <div class="num">3</div>
+          <div class="txt">
+            <b>Não abriu?</b> A mensagem foi copiada! Abra o WhatsApp manualmente, cole a mensagem e anexe o PDF.
+          </div>
+        </div>
         <button type="button" class="btn-main secondary" id="btnCloseModal">
           Fechar
         </button>
       </div>
     </div>
-
     <script>
-      /* ====================== CONFIGURAÇÕES ====================== */
-      const WHATSAPP_NUMBER = "5521966895178"; // <-- altere para o seu número, formato 55DDDNUMERO
+      const WHATSAPP_NUMBER = "5521966895178";
 
-      /* ====================== CÁLCULO DO TOTAL ====================== */
       function brl(value) {
         return value.toLocaleString("pt-BR", {
           style: "currency",
           currency: "BRL",
         });
       }
-
       function formatarDataBR(isoDate) {
         if (!isoDate) return "";
         const [ano, mes, dia] = isoDate.split("-");
         if (!ano || !mes || !dia) return isoDate;
         return `${dia}/${mes}/${ano}`;
       }
-
-      const CARD_SURCHARGE_RATE = 0.08; // 8% de acréscimo no cartão
+      const CARD_SURCHARGE_RATE = 0.08;
 
       function calcularSubtotal() {
         let subtotal = 0;
-
         const modeloSel = document.getElementById("modeloSelect");
         const modeloPrice = parseFloat(
           modeloSel.options[modeloSel.selectedIndex]?.dataset.price || 0,
         );
         subtotal += modeloPrice;
 
+        // Preço da confirmação de presença
+        const confirmSel = document.getElementById("confirmacaoPresenca");
+        const confirmPrice = parseFloat(
+          confirmSel.options[confirmSel.selectedIndex]?.dataset.price || 0,
+        );
+        subtotal += confirmPrice;
+
+        // Álbum de fotos
+        const albumSel = document.querySelector('input[name="albumFotos"]:checked');
+        if (albumSel) {
+          subtotal += parseFloat(albumSel.dataset.price || 0);
+        }
+
         document.querySelectorAll(".extra-checkbox:checked").forEach((el) => {
           subtotal += parseFloat(el.dataset.price || 0);
         });
-
         document.querySelectorAll(".comp-checkbox:checked").forEach((el) => {
-          subtotal += parseFloat(el.dataset.price || 0);
+          const price = parseFloat(el.dataset.price || 0);
+          // Foto no modelo: multiply by quantity
+          if (el.id === 'fotoModeloCheck') {
+            const qtd = parseInt(document.getElementById('qtdFotos').value || 1);
+            subtotal += price * qtd;
+          } else {
+            subtotal += price;
+          }
         });
-
         return subtotal;
       }
-
       function calcularTotal() {
         const subtotal = calcularSubtotal();
         const pagamentoEl = document.querySelector(
@@ -1197,9 +1282,7 @@
         const total = isCartao
           ? subtotal * (1 + CARD_SURCHARGE_RATE)
           : subtotal;
-
         document.getElementById("totalValue").textContent = brl(total);
-
         const cardFeeNote = document.getElementById("cardFeeNote");
         if (cardFeeNote) {
           if (isCartao) {
@@ -1210,55 +1293,106 @@
             cardFeeNote.textContent = "";
           }
         }
-
         return total;
       }
-
       document
-        .querySelectorAll(
-          'select, input[type="checkbox"], input[type="radio"]',
-        )
+        .querySelectorAll('select, input[type="checkbox"], input[type="radio"]')
         .forEach((el) => {
           el.addEventListener("change", calcularTotal);
           el.addEventListener("input", calcularTotal);
         });
 
-      /* Mostrar/ocultar campo de WhatsApp para confirmação de presença */
+      // Foto no modelo: show/hide qty selector and recalculate
+      const fotoModeloCheck = document.getElementById('fotoModeloCheck');
+      const qtdFotosWrap = document.getElementById('qtdFotosWrap');
+      const qtdFotosSelect = document.getElementById('qtdFotos');
+      if (fotoModeloCheck) {
+        fotoModeloCheck.addEventListener('change', () => {
+          qtdFotosWrap.style.display = fotoModeloCheck.checked ? 'block' : 'none';
+          calcularTotal();
+        });
+      }
+      if (qtdFotosSelect) {
+        qtdFotosSelect.addEventListener('change', calcularTotal);
+      }
+
+      // === Localização toggle ===
+      const localizacaoCheck = document.getElementById("localizacaoCheck");
+      const localizacaoWrap = document.getElementById("localizacaoWrap");
+      const localEventoInput = document.getElementById("localEvento");
+      localizacaoCheck.addEventListener("change", () => {
+        localizacaoWrap.style.display = localizacaoCheck.checked ? "block" : "none";
+        if (!localizacaoCheck.checked) localEventoInput.value = "";
+      });
+
+      // === Confirmação de presença toggle ===
+      const confirmacaoCheck = document.getElementById("confirmacaoCheck");
+      const confirmacaoPresencaWrap = document.getElementById("confirmacaoPresencaWrap");
       const confirmacaoSelect = document.getElementById("confirmacaoPresenca");
-      const whatsappConfirmacaoWrap = document.getElementById(
-        "whatsappConfirmacaoWrap",
-      );
-      const whatsappConfirmacaoInput = document.getElementById(
-        "whatsappConfirmacao",
-      );
+      const whatsappConfirmacaoWrap = document.getElementById("whatsappConfirmacaoWrap");
+      const whatsappConfirmacaoInput = document.getElementById("whatsappConfirmacao");
+      const mensagemConfirmacaoWrap = document.getElementById('mensagemConfirmacaoWrap');
+      const mensagemConfirmacaoInput = document.getElementById('mensagemConfirmacao');
+
+      confirmacaoCheck.addEventListener("change", () => {
+        const show = confirmacaoCheck.checked;
+        confirmacaoPresencaWrap.style.display = show ? "block" : "none";
+        if (!show) {
+          confirmacaoSelect.value = "";
+          whatsappConfirmacaoWrap.style.display = "none";
+          whatsappConfirmacaoInput.value = "";
+          mensagemConfirmacaoWrap.style.display = "none";
+          mensagemConfirmacaoInput.value = "";
+          calcularTotal();
+        }
+      });
+
       confirmacaoSelect.addEventListener("change", () => {
         const isWhats = confirmacaoSelect.value === "WhatsApp";
         whatsappConfirmacaoWrap.style.display = isWhats ? "block" : "none";
-        whatsappConfirmacaoInput.required = isWhats;
-        if (!isWhats) whatsappConfirmacaoInput.value = "";
+        mensagemConfirmacaoWrap.style.display = isWhats ? "block" : "none";
+        if (!isWhats) {
+          whatsappConfirmacaoInput.value = "";
+          mensagemConfirmacaoInput.value = "";
+        }
+        calcularTotal();
       });
 
-      /* Mostrar/ocultar campo de sugestões de presente */
+      // === Sugestão de presentes toggle ===
       const presentesCheck = document.getElementById("presentesCheck");
-      const sugestoesPresenteWrap = document.getElementById(
-        "sugestoesPresenteWrap",
-      );
-      presentesCheck.addEventListener("change", () => {
-        sugestoesPresenteWrap.style.display = presentesCheck.checked
-          ? "block"
-          : "none";
-      });
-
-      /* Mostrar/ocultar campo de Chave Pix */
-      const chavePixCheck = document.getElementById("chavePixCheck");
-      const chavePixWrap = document.getElementById("chavePixWrap");
+      const sugestoesPresenteWrap = document.getElementById("sugestoesPresenteWrap");
       const chavePixValorInput = document.getElementById("chavePixValor");
-      chavePixCheck.addEventListener("change", () => {
-        chavePixWrap.style.display = chavePixCheck.checked ? "block" : "none";
-        if (!chavePixCheck.checked) chavePixValorInput.value = "";
+      presentesCheck.addEventListener("change", () => {
+        sugestoesPresenteWrap.style.display = presentesCheck.checked ? "block" : "none";
+        if (!presentesCheck.checked) {
+          document.getElementById("sugestoesPresente").value = "";
+          chavePixValorInput.value = "";
+        }
       });
 
-      /* Mostrar/ocultar campo de Outros */
+      // === Dress code toggle ===
+      const dressCodeCheck = document.getElementById("dressCodeCheck");
+      const dressCodeWrap = document.getElementById("dressCodeWrap");
+      const dressCodeInput = document.getElementById("dressCode");
+      const paletaCoresInput = document.getElementById("paletaCores");
+      dressCodeCheck.addEventListener("change", () => {
+        dressCodeWrap.style.display = dressCodeCheck.checked ? "block" : "none";
+        if (!dressCodeCheck.checked) {
+          dressCodeInput.value = "";
+          paletaCoresInput.value = "";
+        }
+      });
+
+      // === Manual do Convidado toggle ===
+      const manualConvidadoCheck = document.getElementById("manualConvidadoCheck");
+      const manualConvidadoWrap = document.getElementById("manualConvidadoWrap");
+      const manualConvidadoValorInput = document.getElementById("manualConvidadoValor");
+      manualConvidadoCheck.addEventListener("change", () => {
+        manualConvidadoWrap.style.display = manualConvidadoCheck.checked ? "block" : "none";
+        if (!manualConvidadoCheck.checked) manualConvidadoValorInput.value = "";
+      });
+
+      // === Outros toggle ===
       const outrosCheck = document.getElementById("outrosCheck");
       const outrosWrap = document.getElementById("outrosWrap");
       const outrosValorInput = document.getElementById("outrosValor");
@@ -1267,10 +1401,8 @@
         if (!outrosCheck.checked) outrosValorInput.value = "";
       });
 
-      /* ====================== LIMITE DE 5 BOTÕES INTERATIVOS ====================== */
       const botaoCheckboxes = document.querySelectorAll(".botao-checkbox");
       const btnCountEl = document.getElementById("btnCount");
-
       function atualizarLimiteBotoes() {
         const marcados = document.querySelectorAll(
           ".botao-checkbox:checked",
@@ -1289,11 +1421,9 @@
         cb.addEventListener("change", atualizarLimiteBotoes),
       );
 
-      /* ====================== GERAÇÃO DO PDF ====================== */
       const form = document.getElementById("orderForm");
       const errorMsg = document.getElementById("errorMsg");
       const modalOverlay = document.getElementById("modalOverlay");
-
       let lastPdfDoc = null;
       let lastWhatsMessage = "";
 
@@ -1311,13 +1441,10 @@
 
       form.addEventListener("submit", function (e) {
         e.preventDefault();
-
-        /* ---------- Verificação explícita: forma de pagamento ---------- */
         const pagamentoSelecionado = document.querySelector(
           'input[name="pagamento"]:checked',
         );
         const agree = document.getElementById("agreeTerms").checked;
-
         if (!pagamentoSelecionado || !form.checkValidity() || !agree) {
           form.reportValidity();
           errorMsg.style.display = "block";
@@ -1331,9 +1458,55 @@
           }
           return;
         }
+
+        function showErrorForField(fieldId, message) {
+          const field = document.getElementById(fieldId);
+          if (!field) return;
+          errorMsg.textContent = message;
+          errorMsg.style.display = "block";
+          errorMsg.scrollIntoView({ behavior: "smooth", block: "center" });
+          field.style.borderColor = "red";
+          
+          const removeError = () => {
+            field.style.borderColor = "";
+            field.removeEventListener("input", removeError);
+            field.removeEventListener("change", removeError);
+          };
+          
+          field.addEventListener("input", removeError);
+          field.addEventListener("change", removeError);
+          setTimeout(() => field.style.borderColor = "", 3000);
+        }
+
+        if (document.getElementById("localizacaoCheck") && document.getElementById("localizacaoCheck").checked) {
+          const localEvento = document.getElementById("localEvento");
+          if (!localEvento.value.trim()) {
+            showErrorForField("localEvento", "Por favor, preencha o link da localização.");
+            return;
+          }
+        }
+
+        if (document.getElementById("confirmacaoCheck") && document.getElementById("confirmacaoCheck").checked) {
+          const confirmacaoPresenca = document.getElementById("confirmacaoPresenca");
+          if (!confirmacaoPresenca.value) {
+            showErrorForField("confirmacaoPresenca", "Por favor, selecione como será feita a confirmação.");
+            return;
+          } else if (confirmacaoPresenca.value === "WhatsApp") {
+            const whats = document.getElementById("whatsappConfirmacao");
+            const msg = document.getElementById("mensagemConfirmacao");
+            if (!whats.value.trim()) {
+              showErrorForField("whatsappConfirmacao", "Por favor, preencha o número do WhatsApp.");
+              return;
+            }
+            if (!msg.value.trim()) {
+              showErrorForField("mensagemConfirmacao", "Por favor, preencha a mensagem de confirmação.");
+              return;
+            }
+          }
+        }
+
         errorMsg.style.display = "none";
 
-        /* ---------- Verificação da biblioteca de PDF ---------- */
         if (!window.jspdf || !window.jspdf.jsPDF) {
           alert(
             "Não foi possível carregar o gerador de PDF. Isso costuma acontecer por causa da conexão com a internet ou de um bloqueador de anúncios/extensão do navegador.\n\nPor favor, verifique sua conexão, desative bloqueadores de anúncio para este site e recarregue a página antes de tentar novamente.",
@@ -1344,26 +1517,30 @@
         const dados = {
           nomeContratante: document.getElementById("nomeContratante").value,
           cpfContratante: document.getElementById("cpfContratante").value,
+          telefoneContratante: document.getElementById("telefoneContratante").value,
           nomeAniversariante:
             document.getElementById("nomeAniversariante").value,
           dataEvento: document.getElementById("dataEvento").value,
           horaEvento: document.getElementById("horaEvento").value,
-          localEvento: document.getElementById("localEvento").value,
           temaFesta: document.getElementById("temaFesta").value,
-          trilhaSonora: document.getElementById("trilhaSonora").value || "—",
-          dressCode: document.getElementById("dressCode").value || "—",
-          paletaCores: document.getElementById("paletaCores").value || "—",
-          confirmacaoPresenca: document.getElementById("confirmacaoPresenca")
-            .value,
+          trilhaSonora: document.getElementById("trilhaSonora").value || "",
+          coresConvite: document.getElementById("coresConvite").value || "",
+          localEvento: document.getElementById("localEvento").value || "",
+          confirmacaoPresenca: document.getElementById("confirmacaoPresenca").value || "",
           whatsappConfirmacao:
             document.getElementById("whatsappConfirmacao").value || "",
+          mensagemConfirmacao:
+            document.getElementById("mensagemConfirmacao").value || "",
           sugestoesPresente:
             document.getElementById("sugestoesPresente").value || "",
           chavePixValor: document.getElementById("chavePixValor").value || "",
+          dressCode: document.getElementById("dressCode").value || "",
+          paletaCores: document.getElementById("paletaCores").value || "",
+          manualConvidadoValor: document.getElementById("manualConvidadoValor").value || "",
           outrosValor: document.getElementById("outrosValor").value || "",
-          observacoes: document.getElementById("observacoes").value || "—",
+          observacoes: document.getElementById("observacoes").value || "",
           modelo:
-            document.getElementById("modeloSelect").selectedOptions[0].text,
+            document.getElementById("modeloSelect").selectedOptions[0].value,
           pagamento: document.querySelector('input[name="pagamento"]:checked')
             .value,
         };
@@ -1371,11 +1548,155 @@
         const extras = coletarSelecionados(".extra-checkbox");
         const botoes = coletarSelecionados(".botao-checkbox");
         const complementos = coletarSelecionados(".comp-checkbox");
+        const albumSelecionado = document.querySelector('input[name="albumFotos"]:checked');
+        const albumNome = albumSelecionado ? albumSelecionado.value : 'Nenhum';
+        // Add photo qty info to complementos if applicable
+        const fotoModeloEl = document.getElementById('fotoModeloCheck');
+        if (fotoModeloEl && fotoModeloEl.checked) {
+          const qtdFotosVal = parseInt(document.getElementById('qtdFotos').value || 1);
+          const idx = complementos.indexOf('Adicionar foto no modelo do convite');
+          if (idx !== -1) {
+            complementos[idx] = `Adicionar foto no modelo do convite (${qtdFotosVal} foto${qtdFotosVal > 1 ? 's' : ''} - R$ ${(qtdFotosVal * 10).toFixed(2).replace('.', ',')})`;
+          }
+        }
         const subtotal = calcularSubtotal();
         const total = calcularTotal();
         const isCartao = dados.pagamento === "Cartão";
 
-        /* ---------- PDF ---------- */
+        /* ====== LÓGICA DE ALERTA DE PRAZO (SOMENTE PARA A PLANILHA) ====== */
+        const [anoE, mesE, diaE] = dados.dataEvento.split("-");
+        const eventDateObj = new Date(anoE, mesE - 1, diaE);
+        const todayObj = new Date();
+
+        const notificationDateObj = new Date(eventDateObj);
+        notificationDateObj.setMonth(notificationDateObj.getMonth() - 3);
+
+        const jaPassou = notificationDateObj <= todayObj;
+        const avisoPlanilha = jaPassou
+          ? `⚠️ JÁ PASSOU (era ${notificationDateObj.toLocaleDateString("pt-BR")})`
+          : `REPUBLICAR EM: ${notificationDateObj.toLocaleDateString("pt-BR")}`;
+
+        /* ====== ENVIANDO DADOS PARA O GOOGLE SHEETS ====== */
+        const payloadPlanilha = {
+          // Controle
+          dataPedido: todayObj.toLocaleDateString("pt-BR"),
+          dataRepublicacao: avisoPlanilha,
+
+          // Dados do contratante
+          nomeContratante: dados.nomeContratante,
+          cpfContratante: dados.cpfContratante,
+          telefoneContratante: dados.telefoneContratante,
+
+          // Detalhes do evento
+          nomeAniversariante: dados.nomeAniversariante,
+          dataEvento: formatarDataBR(dados.dataEvento),
+          horaEvento: dados.horaEvento,
+          temaFesta: dados.temaFesta,
+          trilhaSonora: dados.trilhaSonora || "Não informado",
+          coresConvite: dados.coresConvite || "Não informado",
+          observacoes: dados.observacoes || "Nenhuma",
+
+          // Botões interativos - dados condicionais
+          localEvento: dados.localEvento || "Não informado",
+          confirmacaoPresenca: dados.confirmacaoPresenca || "Não selecionado",
+          whatsappConfirmacao: dados.whatsappConfirmacao || "Não informado",
+          mensagemConfirmacao: dados.mensagemConfirmacao || "Não informado",
+          dressCode: dados.dressCode || "Não informado",
+          paletaCores: dados.paletaCores || "Não informado",
+          albumFotos: albumNome,
+
+          // Produto
+          modelo: dados.modelo,
+          botoesInterativos: botoes.length ? botoes.join(", ") : "Nenhum",
+          sugestoesPresente: dados.sugestoesPresente || "Não informado",
+          chavePixValor: dados.chavePixValor || "Não informado",
+          manualConvidadoValor: dados.manualConvidadoValor || "Não informado",
+          outrosValor: dados.outrosValor || "Não informado",
+          complementos: complementos.length ? complementos.join(", ") : "Nenhum",
+
+          // Pagamento
+          pagamento: dados.pagamento,
+          subtotal: subtotal,
+          valorTotal: total,
+        };
+
+        // ====== LINK DO GOOGLE APPS SCRIPT ======
+        const GOOGLE_SCRIPT_URL =
+          "https://script.google.com/macros/s/AKfycbwS8VxbLnY1W7WwcPOfjUFRTolWcEXDqbVXtwrRPf0JIbZpTTlD5RmtcSK5bFW8j1mf/exec";
+
+        fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payloadPlanilha),
+        })
+          .then(() => {
+            const sheetStatus = document.getElementById("sheetStatus");
+            if (sheetStatus) {
+              sheetStatus.style.display = "flex";
+            }
+          })
+          .catch((err) => console.log("Erro ao enviar para planilha", err));
+        /* ======================================================== */
+
+        /* ====== ENVIANDO DADOS PARA O SISTEMA DE GESTÃO (API PHP) ====== */
+        (function enviarParaSistema() {
+          try {
+            const termsText = document.getElementById("termsBox").innerText;
+            const payload = {
+              nomeContratante: dados.nomeContratante,
+              cpfContratante: dados.cpfContratante,
+              telefoneContratante: dados.telefoneContratante,
+              nomeAniversariante: dados.nomeAniversariante,
+              dataEvento: dados.dataEvento,
+              horaEvento: dados.horaEvento,
+              temaFesta: dados.temaFesta,
+              trilhaSonora: dados.trilhaSonora,
+              coresConvite: dados.coresConvite,
+              localEvento: dados.localEvento,
+              confirmacaoPresenca: dados.confirmacaoPresenca,
+              whatsappConfirmacao: dados.whatsappConfirmacao,
+              mensagemConfirmacao: dados.mensagemConfirmacao,
+              dressCode: dados.dressCode,
+              paletaCores: dados.paletaCores,
+              albumFotos: albumNome,
+              sugestoesPresente: dados.sugestoesPresente,
+              chavePixValor: dados.chavePixValor,
+              manualConvidadoValor: dados.manualConvidadoValor,
+              outrosValor: dados.outrosValor,
+              observacoes: dados.observacoes,
+              modeloSelect: dados.modelo,
+              botoesInterativos: botoes.join(", "),
+              complementos: complementos.join(", "),
+              pagamento: dados.pagamento,
+              subtotal: subtotal,
+              total: total,
+              termsText: termsText,
+            };
+            // Envia diretamente via POST JSON para a API PHP local (XAMPP)
+            const sistemaURL = "https://raiz-pixel-api.onrender.com/api/receber-pedido.php";
+            fetch(sistemaURL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            })
+              .then(res => res.json())
+              .then(result => {
+                if (result.success) {
+                  console.log("[Raíz & Pixel] Pedido registrado no sistema:", result.pedido_id);
+                  const sistemaStatus = document.getElementById("sistemaStatus");
+                  if (sistemaStatus) sistemaStatus.style.display = "flex";
+                } else {
+                  console.warn("[Raíz & Pixel] Erro ao registrar no sistema:", result.error);
+                }
+              })
+              .catch(err => console.log("Erro ao enviar para sistema de gestão", err));
+          } catch (e) {
+            console.log("Erro ao enviar para sistema de gestão", e);
+          }
+        })();
+        /* ================================================================ */
+
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ unit: "pt", format: "a4" });
         const marginX = 48;
@@ -1389,7 +1710,6 @@
             y = 60;
           }
         }
-
         function addTitle(text) {
           checkPageBreak(26);
           doc.setFont("helvetica", "bold");
@@ -1400,7 +1720,6 @@
           doc.setDrawColor(212, 175, 106);
           doc.line(marginX, y - 14, 545, y - 14);
         }
-
         function addLine(label, value) {
           checkPageBreak();
           doc.setFont("helvetica", "bold");
@@ -1427,29 +1746,57 @@
         addTitle("Dados do Contratante");
         addLine("Nome:", dados.nomeContratante);
         addLine("CPF:", dados.cpfContratante);
+        addLine("Telefone:", dados.telefoneContratante);
         y += 8;
-
         addTitle("Detalhes do Evento");
         addLine("Aniversariante:", dados.nomeAniversariante);
-        addLine("Data:", dados.dataEvento);
+        addLine("Data:", formatarDataBR(dados.dataEvento));
         addLine("Horário:", dados.horaEvento);
-        addLine("Local:", dados.localEvento);
         addLine("Tema:", dados.temaFesta);
         addLine("Trilha sonora:", dados.trilhaSonora);
-        addLine("Dress code:", dados.dressCode);
-        addLine("Paleta de cores:", dados.paletaCores);
-        addLine(
-          "Confirmação via:",
-          dados.confirmacaoPresenca === "WhatsApp" && dados.whatsappConfirmacao
-            ? `WhatsApp (${dados.whatsappConfirmacao})`
-            : dados.confirmacaoPresenca,
-        );
+        if (dados.coresConvite) {
+          addLine("Cores do convite:", dados.coresConvite);
+        }
         addLine("Observações:", dados.observacoes);
+        y += 8;
+        addTitle("Botões Interativos");
+        addLine(
+          "Botões selecionados:",
+          botoes.length ? botoes.join(", ") : "Nenhum",
+        );
+        if (dados.localEvento) {
+          addLine("Localização:", dados.localEvento);
+        }
+        if (dados.confirmacaoPresenca) {
+          addLine(
+            "Confirmação via:",
+            dados.confirmacaoPresenca === "WhatsApp" && dados.whatsappConfirmacao
+              ? `WhatsApp (${dados.whatsappConfirmacao})`
+              : dados.confirmacaoPresenca,
+          );
+          if (dados.mensagemConfirmacao) {
+            addLine("Msg confirmação:", dados.mensagemConfirmacao);
+          }
+        }
         if (dados.sugestoesPresente) {
           addLine("Sugestões de presente:", dados.sugestoesPresente);
         }
+        if (dados.chavePixValor) {
+          addLine("Chave Pix informada:", dados.chavePixValor);
+        }
+        if (dados.dressCode) {
+          addLine("Dress code:", dados.dressCode);
+        }
+        if (dados.paletaCores) {
+          addLine("Paleta de cores:", dados.paletaCores);
+        }
+        if (dados.manualConvidadoValor) {
+          addLine("Manual do Convidado:", dados.manualConvidadoValor);
+        }
+        if (dados.outrosValor) {
+          addLine("Outros (detalhes):", dados.outrosValor);
+        }
         y += 8;
-
         addTitle("Produto Contratado");
         addLine("Modelo:", dados.modelo);
         addLine(
@@ -1457,18 +1804,12 @@
           extras.length ? extras.join(", ") : "Nenhum",
         );
         addLine(
-          "Botões interativos:",
-          botoes.length ? botoes.join(", ") : "Nenhum",
-        );
-        if (dados.chavePixValor) {
-          addLine("Chave Pix informada:", dados.chavePixValor);
-        }
-        if (dados.outrosValor) {
-          addLine("Outros (detalhes):", dados.outrosValor);
-        }
-        addLine(
           "Complementos:",
           complementos.length ? complementos.join(", ") : "Nenhum",
+        );
+        addLine(
+          "Álbum de Fotos:",
+          albumNome !== 'Nenhum' ? albumNome : 'Nenhum',
         );
         addLine("Pagamento:", dados.pagamento);
         if (isCartao) {
@@ -1476,15 +1817,13 @@
           addLine("Acréscimo cartão (8%):", brl(total - subtotal));
         }
         y += 8;
-
         checkPageBreak(30);
         doc.setFont("helvetica", "bold");
         doc.setFontSize(13);
         doc.setTextColor(184, 137, 63);
         doc.text(`Investimento Total: ${brl(total)}`, marginX, y);
         y += 30;
-
-        addTitle("Termos de Contratação — Aceite");
+        addTitle("Termos de Contratação e Aceite");
         doc.setFont("helvetica", "normal");
         doc.setFontSize(9);
         doc.setTextColor(90, 75, 95);
@@ -1501,55 +1840,26 @@
         doc.setFontSize(10);
         doc.setTextColor(76, 175, 107);
         doc.text(
-          "✔ Cliente declara ter lido e concordado com todos os termos acima.",
+          "✓ Cliente declara ter lido e concordado com todos os termos acima.",
           marginX,
           y,
         );
-
         lastPdfDoc = doc;
         lastPdfDoc.fileName = `Contrato_${dados.nomeAniversariante.replace(/\s+/g, "_")}.pdf`;
 
-        /* ---------- Mensagem WhatsApp ---------- */
         const confirmacaoTexto =
           dados.confirmacaoPresenca === "WhatsApp" && dados.whatsappConfirmacao
             ? `WhatsApp (${dados.whatsappConfirmacao})`
             : dados.confirmacaoPresenca;
 
-        lastWhatsMessage = `✨ *RAÍZ & PIXEL CONVITES* ✨
-_Formalização de Pedido_
+        lastWhatsMessage = `✨ *RAÍZ & PIXEL CONVITES* ✨\n_Formalização de Pedido_\n\nOlá! Tudo bem? Gostaria de formalizar meu pedido👇\n\n👤 *CONTRATANTE*\nNome: ${dados.nomeContratante}\nTelefone: ${dados.telefoneContratante}\n\n🎉 *DETALHES DO EVENTO*\nAniversariante: ${dados.nomeAniversariante}\nData: ${formatarDataBR(dados.dataEvento)} às ${dados.horaEvento}\nTema: ${dados.temaFesta}${dados.coresConvite ? `\nCores do convite: ${dados.coresConvite}` : ""}\n\n🔘 *BOTÕES INTERATIVOS*\nBotões: ${botoes.length ? botoes.join(", ") : "Nenhum"}${dados.localEvento ? `\nLocalização: ${dados.localEvento}` : ""}${dados.confirmacaoPresenca ? `\nConfirmação via: ${confirmacaoTexto}` : ""}${dados.mensagemConfirmacao ? `\nMensagem de confirmação: ${dados.mensagemConfirmacao}` : ""}${dados.sugestoesPresente ? `\nSugestões de presente: ${dados.sugestoesPresente}` : ""}${dados.chavePixValor ? `\nChave Pix: ${dados.chavePixValor}` : ""}${dados.dressCode ? `\nDress code: ${dados.dressCode}` : ""}${dados.paletaCores ? `\nPaleta de cores: ${dados.paletaCores}` : ""}${dados.manualConvidadoValor ? `\nManual do Convidado: ${dados.manualConvidadoValor}` : ""}${dados.outrosValor ? `\nOutros: ${dados.outrosValor}` : ""}\n\n🛍️ *PRODUTO CONTRATADO*\nModelo: ${dados.modelo}\nComplementos: ${complementos.length ? complementos.join(", ") : "Nenhum"}\nÁlbum de Fotos: ${albumNome !== 'Nenhum' ? albumNome : 'Nenhum'}\n\n💳 *PAGAMENTO*\nForma: ${dados.pagamento}${isCartao ? `\nSubtotal: ${brl(subtotal)}\nAcréscimo cartão (8%): ${brl(total - subtotal)}` : ""}\n*Investimento Total: ${brl(total)}*\n\n📄 Estou anexando o PDF do contrato que acabei de baixar, conforme orientado! Aguardo retorno, obrigado(a)!`;
 
-Olá! Tudo bem? Gostaria de formalizar meu pedido 💌
-
-*👤 CONTRATANTE*
-Nome: ${dados.nomeContratante}
-
-*🎉 DETALHES DO EVENTO*
-🎂 Aniversariante: ${dados.nomeAniversariante}
-📅 Data: ${formatarDataBR(dados.dataEvento)} às ${dados.horaEvento}
-🎨 Tema: ${dados.temaFesta}
-✅ Confirmação via: ${confirmacaoTexto}${dados.sugestoesPresente ? `\n🎁 Sugestões de presente: ${dados.sugestoesPresente}` : ""}
-
-*💌 PRODUTO CONTRATADO*
-📦 Modelo: ${dados.modelo}
-➕ Complementos: ${complementos.length ? complementos.join(", ") : "Nenhum"}${dados.chavePixValor ? `\n🔑 Chave Pix informada: ${dados.chavePixValor}` : ""}${dados.outrosValor ? `\n📝 Outros (detalhes): ${dados.outrosValor}` : ""}
-
-*💰 PAGAMENTO*
-Forma: ${dados.pagamento}${isCartao ? `\nSubtotal: ${brl(subtotal)}\nAcréscimo cartão (8%): ${brl(total - subtotal)}` : ""}
-
-💎 *Investimento Total: ${brl(total)}*
-
-📎 Estou anexando o PDF do contrato que acabei de baixar, conforme orientado!
-
-Aguardo retorno, obrigado(a)! 🙏`;
-
-        /* Reabrir modal no estado inicial */
         document.getElementById("stepDownload").classList.remove("done");
         document.getElementById("stepWhats").classList.remove("done");
         document.getElementById("btnSendWhats").disabled = true;
         modalOverlay.classList.add("active");
       });
 
-      /* ---------- Passo 1: baixar PDF ---------- */
       document
         .getElementById("btnDownloadPdf")
         .addEventListener("click", function () {
@@ -1559,26 +1869,37 @@ Aguardo retorno, obrigado(a)! 🙏`;
           document.getElementById("btnSendWhats").disabled = false;
         });
 
-      /* ---------- Passo 2: enviar WhatsApp ---------- */
       document
         .getElementById("btnSendWhats")
         .addEventListener("click", function () {
           document.getElementById("stepWhats").classList.add("done");
+          
+          navigator.clipboard.writeText(lastWhatsMessage).then(() => {
+            let toast = document.createElement("div");
+            toast.textContent = "Mensagem copiada! Cole no WhatsApp se a conversa abrir sem texto.";
+            toast.style.cssText = "position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px 20px; border-radius: 8px; z-index: 10000; font-size: 0.9rem; box-shadow: 0 4px 6px rgba(0,0,0,0.2); text-align: center; width: 90%; max-width: 400px;";
+            document.body.appendChild(toast);
+            setTimeout(() => {
+              if(document.body.contains(toast)) document.body.removeChild(toast);
+            }, 5000);
+          }).catch(err => console.error("Erro ao copiar: ", err));
+
           const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lastWhatsMessage)}`;
           const newWindow = window.open(url, "_blank");
           if (!newWindow) {
             window.location.href = url;
           }
+          
+          const fallback = document.getElementById("stepFallback");
+          if (fallback) fallback.style.display = "flex";
         });
 
-      /* ---------- Fechar modal ---------- */
       document
         .getElementById("btnCloseModal")
         .addEventListener("click", function () {
           modalOverlay.classList.remove("active");
         });
 
-      /* Cálculo inicial */
       calcularTotal();
     </script>
   </body>

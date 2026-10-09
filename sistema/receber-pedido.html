@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Raíz & Pixel — Recebimento de pedido via formulário.">
+  <title>Recebendo Pedido — Raíz & Pixel</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#9b59b6" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Banco de dados local (IndexedDB) -->
+  <script src="js/dexie.min.js"></script>
+  <script src="js/database.js?v=9"></script>
+</head>
+<body>
+  <div class="receive-page">
+    <div class="receive-card loading" id="receive-card">
+      <!-- Estado: Carregando -->
+      <div id="state-loading">
+        <div class="status-icon">⏳</div>
+        <h2 class="status-title">Processando Pedido</h2>
+        <p class="status-message">Aguarde enquanto registramos o pedido no sistema...</p>
+        <div class="loading-spinner" style="margin: 0 auto;"></div>
+      </div>
+
+      <!-- Estado: Sucesso -->
+      <div id="state-success" style="display: none;">
+        <div class="status-icon success-animate">✅</div>
+        <h2 class="status-title">Pedido Registrado!</h2>
+        <p class="status-message" id="success-message"></p>
+        <div class="status-details" id="success-details"></div>
+        <a href="app.html" class="btn btn-primary" style="text-decoration: none;">
+          Abrir Painel de Gestão
+        </a>
+      </div>
+
+      <!-- Estado: Erro -->
+      <div id="state-error" style="display: none;">
+        <div class="status-icon">❌</div>
+        <h2 class="status-title">Erro ao Registrar</h2>
+        <p class="status-message" id="error-message">Ocorreu um erro inesperado.</p>
+        <button class="btn btn-secondary" onclick="window.location.reload()" style="margin-top: 8px;">
+          Tentar Novamente
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (async function () {
+      'use strict';
+
+      const card         = document.getElementById('receive-card');
+      const stateLoading = document.getElementById('state-loading');
+      const stateSuccess = document.getElementById('state-success');
+      const stateError   = document.getElementById('state-error');
+      const successMsg   = document.getElementById('success-message');
+      const successDet   = document.getElementById('success-details');
+      const errorMsg     = document.getElementById('error-message');
+
+      function showState(state) {
+        stateLoading.style.display = 'none';
+        stateSuccess.style.display = 'none';
+        stateError.style.display   = 'none';
+        card.classList.remove('loading', 'success', 'error');
+        if (state === 'loading') { stateLoading.style.display = 'block'; card.classList.add('loading'); }
+        else if (state === 'success') { stateSuccess.style.display = 'block'; card.classList.add('success'); }
+        else if (state === 'error')   { stateError.style.display   = 'block'; card.classList.add('error'); }
+      }
+
+      try {
+        // Aguardar banco inicializar
+        await DB_READY;
+
+        // ── 1. Ler parâmetros da URL ─────────────────────────
+        const params = new URLSearchParams(window.location.search);
+
+        const nomeContratante     = params.get('nomeContratante')     || '';
+        const cpfContratante      = params.get('cpfContratante')      || '';
+        const telefoneContratante = params.get('telefoneContratante') || '';
+
+        if (!nomeContratante || !cpfContratante) {
+          throw new Error('Parâmetros obrigatórios ausentes (nome e CPF do contratante).');
+        }
+
+        // ── 2. Criar ou atualizar cliente no banco local ─────
+        let cliente = await DB.clientes.getByCpf(cpfContratante);
+
+        if (!cliente) {
+          cliente = await DB.clientes.create({
+            nome:     nomeContratante,
+            cpf:      cpfContratante,
+            telefone: telefoneContratante
+          });
+        } else if (telefoneContratante && !cliente.telefone) {
+          await DB.clientes.update(cliente.id, { telefone: telefoneContratante });
+        }
+
+        // ── 3. Criar pedido no banco local ───────────────────
+        const pedido = await DB.pedidos.create({
+          cliente_id:           cliente.id,
+          nome_aniversariante:  params.get('nomeAniversariante')   || '',
+          data_evento:          params.get('dataEvento')           || null,
+          hora_evento:          params.get('horaEvento')           || null,
+          local_evento:         params.get('localEvento')          || '',
+          tema_festa:           params.get('temaFesta')            || '',
+          trilha_sonora:        params.get('trilhaSonora')         || '',
+          dress_code:           params.get('dressCode')            || '',
+          paleta_cores:         params.get('paletaCores')          || '',
+          cores_convite:        params.get('coresConvite')         || '',
+          confirmacao_presenca: params.get('confirmacaoPresenca')  || '',
+          whatsapp_confirmacao: params.get('whatsappConfirmacao')  || '',
+          mensagem_confirmacao: params.get('mensagemConfirmacao')  || '',
+          sugestoes_presente:   params.get('sugestoesPresente')    || '',
+          chave_pix:            params.get('chavePixValor')        || '',
+          manual_convidado:     params.get('manualConvidadoValor') || '',
+          outros_detalhes:      params.get('outrosValor')          || '',
+          observacoes:          params.get('observacoes')          || '',
+          modelo:               params.get('modeloSelect')         || '',
+          botoes_interativos:   params.get('botoesInterativos')    || '',
+          complementos:         params.get('complementos')         || '',
+          album_fotos:          params.get('albumFotos')           || 'Nenhum',
+          forma_pagamento:      params.get('pagamento')            || '',
+          subtotal:             parseFloat(params.get('subtotal')) || 0,
+          valor_total:          parseFloat(params.get('total'))    || 0,
+          aceite_termos:        true,
+          texto_termos:         params.get('termsText')            || '',
+          status:               'Novo'
+        });
+
+        // ── 4. Mostrar sucesso ───────────────────────────────
+        successMsg.innerHTML =
+          `O pedido de <strong>${nomeContratante}</strong> foi registrado com sucesso no sistema.`;
+
+        successDet.innerHTML = `
+          <div class="detail-row">
+            <span class="detail-label">Cliente</span>
+            <span class="detail-value">${nomeContratante}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">CPF</span>
+            <span class="detail-value">${formatCPF(cpfContratante)}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Aniversariante</span>
+            <span class="detail-value">${pedido.nome_aniversariante || '—'}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Modelo</span>
+            <span class="detail-value">${pedido.modelo || '—'}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Valor Total</span>
+            <span class="detail-value">${formatBRL(pedido.valor_total)}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">ID do Pedido</span>
+            <span class="detail-value" style="font-size:0.78rem;opacity:0.7;">${pedido.id}</span>
+          </div>
+        `;
+
+        showState('success');
+
+      } catch (err) {
+        console.error('[Raíz & Pixel] Erro ao processar pedido:', err);
+        errorMsg.textContent = err.message || 'Ocorreu um erro inesperado ao registrar o pedido.';
+        showState('error');
+      }
+    })();
+  </script>
+</body>
+</html>
