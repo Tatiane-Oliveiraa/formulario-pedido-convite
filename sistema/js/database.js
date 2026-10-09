@@ -238,14 +238,23 @@
         });
 
         let resultado;
+        let rawText = '';
         try {
+          rawText = await response.clone().text();
           resultado = await response.json();
         } catch {
-          showToast('❌ Erro: servidor retornou resposta inválida.', 'error', 8000);
+          // Mostrar o texto bruto do servidor para diagnóstico
+          alert(
+            '❌ O servidor retornou uma resposta inesperada.\n\n' +
+            'ERRO DO SERVIDOR:\n' +
+            (rawText ? rawText.substring(0, 800) : '(sem resposta)')
+          );
+          showToast('❌ Erro no servidor — veja o alerta para detalhes.', 'error', 8000);
           return;
         }
 
         if (!response.ok || resultado.error) {
+          alert('❌ Erro ao importar:\n\n' + (resultado.error || 'Erro desconhecido'));
           showToast('❌ Erro ao importar: ' + (resultado.error || 'Erro desconhecido'), 'error', 8000);
           return;
         }
