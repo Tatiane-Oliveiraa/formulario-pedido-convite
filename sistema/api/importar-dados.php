@@ -10,6 +10,12 @@
 
 require_once __DIR__ . '/config.php';
 
+// Importação envolve centenas de INSERTs remotos: evita estourar o limite de 30s do PHP
+// e continua mesmo se o navegador desconectar.
+@set_time_limit(0);
+@ignore_user_abort(true);
+@ini_set('memory_limit', '256M');
+
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { exit(0); }
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') { jsonError('Método não permitido', 405); }
 
